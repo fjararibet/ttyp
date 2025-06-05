@@ -25,6 +25,10 @@ class TtypeLexer(Lexer):
             line = document.lines[lineno]
             tokens = []
             for written_word, to_write_word in zip(self.written.split(), self.to_write):
+                if written_word == to_write_word:
+                    tokens.append(("class:written", written_word))
+                    tokens.append(("", " "))
+                    continue
                 # char by char
                 longest_word_len = len(max(written_word, to_write_word))
                 shortest_word_len = len(min(written_word, to_write_word))
