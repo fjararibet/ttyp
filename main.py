@@ -26,11 +26,17 @@ written = ["", ""]
 def on_key(event):
     written[1] = written[1] + event.data
     to_write[1] = to_write[1][1:]
+    if (len(to_write[1]) == 0):
+        event.app.current_buffer.validate_and_handle()
     global start
     if start > 0:
         return
     start = time.time()
 
+@bindings.add("backspace")
+def on_backspace(event):
+    to_write[1] = written[1][-1] + to_write[1]
+    written[1] = written[1][:-1]
 
 def get_prompt():
     return FormattedText([tuple(written), tuple(to_write)])
