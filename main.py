@@ -20,10 +20,13 @@ start = -1
 words = " ".join(random_words())
 to_write = ["#999999", words]
 written = ["", ""]
+curr_index = 0
 
 
 @bindings.add("<any>")
 def on_key(event):
+    global curr_index
+    curr_index += 1
     written[1] = written[1] + event.data
     to_write[1] = to_write[1][1:]
     if (len(to_write[1]) == 0):
@@ -33,10 +36,14 @@ def on_key(event):
         return
     start = time.time()
 
+
 @bindings.add("backspace")
 def on_backspace(event):
-    to_write[1] = written[1][-1] + to_write[1]
+    global curr_index
+    curr_index = curr_index - 1 if curr_index > 0 else curr_index
+    to_write[1] = words[curr_index:]
     written[1] = written[1][:-1]
+
 
 def get_prompt():
     return FormattedText([tuple(written), tuple(to_write)])
