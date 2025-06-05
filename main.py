@@ -1,4 +1,6 @@
 from random import randint
+from prompt_toolkit import print_formatted_text as print
+from prompt_toolkit.formatted_text import FormattedText
 
 
 def random_words():
@@ -11,9 +13,14 @@ def random_words():
 
 
 to_write = " ".join(random_words())
-print(to_write)
+text = FormattedText([
+    ("#999999", to_write),
+])
+
+print(text)
+
 user_text = input()
 if user_text == to_write:
-    print("Sucess!")
+    print(FormattedText([("#00cc00", "Sucess!")]))
 else:
-    print("Fail!")
+    print(FormattedText([("#cc0000", "Fail!")]))
