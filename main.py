@@ -1,6 +1,8 @@
 from random import randint
-from prompt_toolkit import print_formatted_text as print
+import time
+from prompt_toolkit import print_formatted_text as print, PromptSession
 from prompt_toolkit.formatted_text import FormattedText
+from prompt_toolkit.key_binding import KeyBindings
 
 
 def random_words():
@@ -12,15 +14,34 @@ def random_words():
     return [all_words[randint(0, len(all_words)-1)] for _ in range(word_count)]
 
 
-to_write = " ".join(random_words())
-text = FormattedText([
-    ("#999999", to_write),
-])
+session = PromptSession()
+bindings = KeyBindings()
+start = -1
+words = " ".join(random_words())
+to_write = ["#999999", words]
+written = ["", ""]
 
-print(text)
 
-user_text = input()
-if user_text == to_write:
-    print(FormattedText([("#00cc00", "Sucess!")]))
+@bindings.add("<any>")
+def on_key(event):
+    written[1] = written[1] + event.data
+    to_write[1] = to_write[1][1:]
+    global start
+    if start > 0:
+        return
+    start = time.time()
+
+
+def get_prompt():
+    return FormattedText([tuple(written), tuple(to_write)])
+
+
+user_text = session.prompt(get_prompt, key_bindings=bindings)
+
+if written[1] == words:
+    total_time_sec = time.time() - start
+    wpm = len(words) / 5 * 60 / total_time_sec
+    print(FormattedText([("#00cc00", f"wpm {wpm:.0f}")]))
+
 else:
     print(FormattedText([("#cc0000", "Fail!")]))
