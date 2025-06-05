@@ -1,8 +1,51 @@
-from random import randint
-import time
-from prompt_toolkit import print_formatted_text as print, PromptSession
-from prompt_toolkit.formatted_text import FormattedText
+from prompt_toolkit.application import Application
+from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.layout import Layout, HSplit, Window
+from prompt_toolkit.layout.controls import BufferControl
+from prompt_toolkit.lexers import Lexer
+from prompt_toolkit.styles import Style
+from prompt_toolkit.document import Document
+from random import randint
+
+
+class TtypeLexer(Lexer):
+    def __init__(self, to_write, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.written = ""
+        self.to_write = to_write
+
+    def add_char(self, char):
+        self.written += char
+
+    def lex_document(self, document: Document):
+        text = document.text
+
+        def get_line(lineno):
+            line = document.lines[lineno]
+            tokens = []
+            for written_word, to_write_word in zip(self.written.split(), self.to_write):
+                # char by char
+                longest_word_len = len(max(written_word, to_write_word))
+                shortest_word_len = len(min(written_word, to_write_word))
+                for i in range(longest_word_len):
+                    if i < shortest_word_len:
+                        if written_word[i] == to_write_word[i]:
+                            tokens.append(("class:written", written_word[i]))
+                        else:
+                            tokens.append(("class:wrong", written_word[i]))
+                    else:
+                        tokens.append(("class:ghost", to_write_word[i]))
+                tokens.append(("", " "))
+            for i, word in enumerate(self.to_write):
+                if i < len(self.written.split()):
+                    continue
+                tokens.append(("class:ghost", word))
+                tokens.append(("", " "))
+
+            return tokens
+
+        return get_line
 
 
 def random_words():
@@ -13,48 +56,44 @@ def random_words():
             all_words.append(word.strip("\n"))
     return [all_words[randint(0, len(all_words)-1)] for _ in range(word_count)]
 
+to_write = random_words()
+lexer = TtypeLexer(to_write)
+def on_insert(buffer):
+    lexer.add_char(buffer.text[-1])
+buffer = Buffer(on_text_insert=on_insert)
 
-session = PromptSession()
-bindings = KeyBindings()
-start = -1
-words = " ".join(random_words())
-to_write = ["#999999", words]
-written = ["", ""]
-curr_index = 0
-
-
-@bindings.add("<any>")
-def on_key(event):
-    global curr_index
-    curr_index += 1
-    written[1] = written[1] + event.data
-    to_write[1] = to_write[1][1:]
-    if (len(to_write[1]) == 0):
-        event.app.current_buffer.validate_and_handle()
-    global start
-    if start > 0:
-        return
-    start = time.time()
+# Key bindings
+kb = KeyBindings()
 
 
-@bindings.add("backspace")
-def on_backspace(event):
-    global curr_index
-    curr_index = curr_index - 1 if curr_index > 0 else curr_index
-    to_write[1] = words[curr_index:]
-    written[1] = written[1][:-1]
+@kb.add('c-c')
+def exit_(event):
+    event.app.exit()
 
 
-def get_prompt():
-    return FormattedText([tuple(written), tuple(to_write)])
+# buffer.text = " ".join(to_write)
 
+# Layout
+root_container = HSplit([
+    Window(BufferControl(buffer=buffer, lexer=lexer))
+])
 
-user_text = session.prompt(get_prompt, key_bindings=bindings)
+layout = Layout(root_container)
 
-if written[1] == words:
-    total_time_sec = time.time() - start
-    wpm = len(words) / 5 * 60 / total_time_sec
-    print(FormattedText([("#00cc00", f"wpm {wpm:.0f}")]))
+# Style definitions
+style = Style.from_dict({
+    "ghost": "#999999",
+    "wrong": "#cc0000",
+    "written": "",
+})
 
-else:
-    print(FormattedText([("#cc0000", "Fail!")]))
+# Application
+app = Application(
+    layout=layout,
+    key_bindings=kb,
+    full_screen=False,
+    style=style
+)
+
+if __name__ == '__main__':
+    app.run()
