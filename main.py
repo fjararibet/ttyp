@@ -12,37 +12,32 @@ from random import randint
 class TtypeLexer(Lexer):
     def __init__(self, to_write, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.written = ""
         self.to_write = to_write
 
-    def add_char(self, char):
-        self.written += char
-
     def lex_document(self, document: Document):
-        text = document.text
 
         def get_line(lineno):
             line = document.lines[lineno]
             tokens = []
-            for written_word, to_write_word in zip(self.written.split(), self.to_write):
+            for written_word, to_write_word in zip(line.split(), self.to_write):
                 if written_word == to_write_word:
                     tokens.append(("class:written", written_word))
                     tokens.append(("", " "))
                     continue
                 # char by char
-                longest_word_len = len(max(written_word, to_write_word))
-                shortest_word_len = len(min(written_word, to_write_word))
-                for i in range(longest_word_len):
-                    if i < shortest_word_len:
-                        if written_word[i] == to_write_word[i]:
-                            tokens.append(("class:written", written_word[i]))
-                        else:
-                            tokens.append(("class:wrong", written_word[i]))
-                    else:
-                        tokens.append(("class:ghost", to_write_word[i]))
+                min_len = min(len(written_word), len(to_write_word))
+                for i, j in zip(written_word, to_write_word):
+                    style = "written" if i == j else "wrong"
+                    tokens.append((f"class:{style}", i))
+                for c in written_word[min_len:]:
+                    style = "wrong"
+                    tokens.append((f"class:{style}", c))
+                for c in to_write_word[min_len:]:
+                    style = "ghost"
+                    tokens.append((f"class:{style}", c))
                 tokens.append(("", " "))
             for i, word in enumerate(self.to_write):
-                if i < len(self.written.split()):
+                if i < len(line.split()):
                     continue
                 tokens.append(("class:ghost", word))
                 tokens.append(("", " "))
@@ -60,11 +55,12 @@ def random_words():
             all_words.append(word.strip("\n"))
     return [all_words[randint(0, len(all_words)-1)] for _ in range(word_count)]
 
+
 to_write = random_words()
 lexer = TtypeLexer(to_write)
-def on_insert(buffer):
-    lexer.add_char(buffer.text[-1])
-buffer = Buffer(on_text_insert=on_insert)
+
+
+buffer = Buffer()
 
 # Key bindings
 kb = KeyBindings()
