@@ -174,5 +174,5 @@ if __name__ == '__main__':
     if result:
         wpm = result.get("wpm")
         acc = result.get("acc")
-        print(f"\nwpm {wpm:.1f}")
-        print(f"acc {acc*100:.1f}%")
+        print(f"\n{wpm:.1f} wpm")
+        print(f"{acc*100:.1f}% acc")
