@@ -1,12 +1,13 @@
 from prompt_toolkit.application import Application
 from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.key_binding import KeyBindings, KeyPressEvent
 from prompt_toolkit.layout import Layout, HSplit, Window
 from prompt_toolkit.layout.controls import BufferControl
 from prompt_toolkit.lexers import Lexer
 from prompt_toolkit.styles import Style
 from prompt_toolkit.document import Document
 from random import randint
+import time
 
 
 class TtypeLexer(Lexer):
@@ -66,21 +67,31 @@ to_write = random_words()
 lexer = TtypeLexer(to_write)
 
 
-buffer = Buffer()
+def on_change(buffer: Buffer):
+    global start
+    if not start:
+        start = time.time()
+    typed = buffer.text.split()
+    if len(typed) >= len(to_write) and typed[-1] == to_write[-1]:
+        elapsed = time.time() - start
+        wpm = len(" ".join(typed)) / 5 * 60 / elapsed
+        buffer.app.exit(result=wpm)
+
+
+buffer = Buffer(on_text_changed=on_change)
 
 kb = KeyBindings()
 
+start = None
+
 
 @kb.add('c-c')
-def exit_(event):
+def exit_(event: KeyPressEvent):
     event.app.exit()
 
 
 @kb.add('enter')
-def exit_(event):
-    """
-    Disable enter
-    """
+def disable_enter(event: KeyPressEvent):
     pass
 
 
@@ -102,6 +113,9 @@ app = Application(
     full_screen=False,
     style=style
 )
+buffer.app = app
 
 if __name__ == '__main__':
-    app.run()
+    result = app.run()
+    if result:
+        print(f"wpm {result:.1f}")
