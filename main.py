@@ -33,10 +33,31 @@ class Ttype():
                 result += 1
         return result
 
+    def _number_of_incorrect_chars(self, typed: str):
+        result = 0
+        for typed_word, correct_word in zip(typed, self.to_write):
+            if typed_word == correct_word:
+                continue
+            for i, j in zip(typed_word, correct_word):
+                if i != j:
+                    continue
+                result += 1
+            # remaing errors if they exists
+            min_len = min(len(typed_word), len(correct_word))
+            for c in typed_word[min_len:]:
+                result += 1
+
+        return result
+
     def get_wpm(self, typed: str, elapsed):
         correct_chars = self._number_of_correct_chars(typed)
         wpm = correct_chars / 5 * 60 / elapsed
         return wpm
+
+    def get_acc(self, typed: str):
+        correct_chars = self._number_of_correct_chars(typed)
+        incorrect_chars = self._number_of_incorrect_chars(typed)
+        return correct_chars / (correct_chars + incorrect_chars)
 
 
 class TtypeLexer(Lexer):
@@ -107,7 +128,8 @@ def on_change(buffer: Buffer):
     if len(typed) >= len(to_write) and typed[-1] == to_write[-1]:
         elapsed = time.time() - start
         wpm = ttype.get_wpm(typed, elapsed)
-        buffer.app.exit(result=wpm)
+        acc = ttype.get_acc(typed)
+        buffer.app.exit(result={"wpm": wpm, "acc": acc})
 
 
 buffer = Buffer(on_text_changed=on_change)
@@ -150,4 +172,7 @@ buffer.app = app
 if __name__ == '__main__':
     result = app.run()
     if result:
-        print(f"wpm {result:.1f}")
+        wpm = result.get("wpm")
+        acc = result.get("acc")
+        print(f"\nwpm {wpm:.1f}")
+        print(f"acc {acc*100:.1f}%")
