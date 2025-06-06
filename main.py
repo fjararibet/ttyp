@@ -14,12 +14,35 @@ class Ttype():
     def __init__(self, to_write: [str]):
         self.written: str = []
         self.to_write: [str] = to_write
+        self.mistakes: int = 0
 
     def add_word(self, word: str):
         self.written.append(word)
 
     def set_written(self, written: str):
         self.written = written
+
+    def insert_char(self, typed: str):
+        """Should be called on all inserted chars, even if they
+        are later deleted, so the mistake tracking is accurate.
+        For now it assumes that the rightmost char is the last inserted,
+        which is not correct, since the user can move the cursor."
+        TODO: Account for cursor position.
+        """
+        typed_words = typed.split()
+        last_typed_word = typed_words[-1]
+        last_inserted_char = last_typed_word[-1]
+        if (last_inserted_char == " "):
+            return
+        if (len(typed_words) > len(to_write)):
+            return
+        curr_target_word = to_write[len(typed_words)-1]
+        if (len(last_typed_word) > len(curr_target_word)):
+            self.mistakes += 1
+            return
+
+        if (last_inserted_char != curr_target_word[len(last_typed_word)-1]):
+            self.mistakes += 1
 
     def _number_of_correct_chars(self, typed: str):
         result = 0
@@ -56,7 +79,7 @@ class Ttype():
 
     def get_acc(self, typed: str):
         correct_chars = self._number_of_correct_chars(typed)
-        incorrect_chars = self._number_of_incorrect_chars(typed)
+        incorrect_chars = self.mistakes
         return correct_chars / (correct_chars + incorrect_chars)
 
 
@@ -132,7 +155,12 @@ def on_change(buffer: Buffer):
         buffer.app.exit(result={"wpm": wpm, "acc": acc})
 
 
-buffer = Buffer(on_text_changed=on_change)
+def on_insert(buffer: Buffer):
+    typed = buffer.text
+    ttype.insert_char(typed)
+
+
+buffer = Buffer(on_text_changed=on_change, on_text_insert=on_insert)
 
 kb = KeyBindings()
 
