@@ -24,17 +24,23 @@ class TtypeLexer(Lexer):
                     tokens.append(("class:written", written_word))
                     tokens.append(("", " "))
                     continue
+
                 # char by char
                 min_len = min(len(written_word), len(to_write_word))
                 for i, j in zip(written_word, to_write_word):
                     style = "written" if i == j else "wrong"
                     tokens.append((f"class:{style}", i))
+
+                # leftover written word
                 for c in written_word[min_len:]:
                     style = "wrong"
                     tokens.append((f"class:{style}", c))
+
+                # leftover target word
                 for c in to_write_word[min_len:]:
                     style = "ghost"
                     tokens.append((f"class:{style}", c))
+
                 tokens.append(("", " "))
             for i, word in enumerate(self.to_write):
                 if i < len(line.split()):
