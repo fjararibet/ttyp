@@ -10,6 +10,35 @@ from random import randint
 import time
 
 
+class Ttype():
+    def __init__(self, to_write: [str]):
+        self.written: str = []
+        self.to_write: [str] = to_write
+
+    def add_word(self, word: str):
+        self.written.append(word)
+
+    def set_written(self, written: str):
+        self.written = written
+
+    def _number_of_correct_chars(self, typed: str):
+        result = 0
+        for typed_word, correct_word in zip(typed, self.to_write):
+            if typed_word == correct_word:
+                result += len(typed_word)
+                continue
+            for i, j in zip(typed_word, correct_word):
+                if i != j:
+                    continue
+                result += 1
+        return result
+
+    def get_wpm(self, typed: str, elapsed):
+        correct_chars = self._number_of_correct_chars(typed)
+        wpm = correct_chars / 5 * 60 / elapsed
+        return wpm
+
+
 class TtypeLexer(Lexer):
     def __init__(self, to_write, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -67,6 +96,9 @@ to_write = random_words()
 lexer = TtypeLexer(to_write)
 
 
+ttype = Ttype(to_write)
+
+
 def on_change(buffer: Buffer):
     global start
     if not start:
@@ -74,7 +106,7 @@ def on_change(buffer: Buffer):
     typed = buffer.text.split()
     if len(typed) >= len(to_write) and typed[-1] == to_write[-1]:
         elapsed = time.time() - start
-        wpm = len(" ".join(typed)) / 5 * 60 / elapsed
+        wpm = ttype.get_wpm(typed, elapsed)
         buffer.app.exit(result=wpm)
 
 
