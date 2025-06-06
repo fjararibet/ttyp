@@ -68,7 +68,6 @@ lexer = TtypeLexer(to_write)
 
 buffer = Buffer()
 
-# Key bindings
 kb = KeyBindings()
 
 
@@ -77,23 +76,26 @@ def exit_(event):
     event.app.exit()
 
 
-# buffer.text = " ".join(to_write)
+@kb.add('enter')
+def exit_(event):
+    """
+    Disable enter
+    """
+    pass
 
-# Layout
+
 root_container = HSplit([
     Window(BufferControl(buffer=buffer, lexer=lexer))
 ])
 
 layout = Layout(root_container)
 
-# Style definitions
 style = Style.from_dict({
     "ghost": "#999999",
     "wrong": "#cc0000",
     "written": "",
 })
 
-# Application
 app = Application(
     layout=layout,
     key_bindings=kb,
