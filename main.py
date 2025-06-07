@@ -48,12 +48,16 @@ class Ttype():
         result = 0
         for typed_word, correct_word in zip(typed, self.to_write):
             if typed_word == correct_word:
-                result += len(typed_word)
+                result += len(typed_word) + 1  # account for space
                 continue
             for i, j in zip(typed_word, correct_word):
                 if i != j:
                     continue
                 result += 1
+        # A space each counted for each word,
+        # but the last one doesn't have a space
+        if typed[-1] == self.to_write[-1]:
+            result -= 1
         return result
 
     def _number_of_incorrect_chars(self, typed: str):
