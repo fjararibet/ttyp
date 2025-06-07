@@ -14,7 +14,7 @@ wheels = [
 ]
 
 [[package]]
-name = "ttype"
+name = "ttyp"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

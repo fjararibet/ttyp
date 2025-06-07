@@ -8,6 +8,7 @@ from prompt_toolkit.styles import Style
 from prompt_toolkit.document import Document
 from random import randint
 import time
+from args import get_args
 
 
 class Ttype():
@@ -34,9 +35,9 @@ class Ttype():
         last_inserted_char = last_typed_word[-1]
         if (last_inserted_char == " "):
             return
-        if (len(typed_words) > len(to_write)):
+        if (len(typed_words) > len(self.to_write)):
             return
-        curr_target_word = to_write[len(typed_words)-1]
+        curr_target_word = self.to_write[len(typed_words)-1]
         if (len(last_typed_word) > len(curr_target_word)):
             self.mistakes += 1
             return
@@ -131,80 +132,75 @@ class TtypeLexer(Lexer):
         return get_line
 
 
-def random_words():
+def random_words(language: str, word_count: int):
     all_words = []
-    word_count = 10
-    with open("./words.txt") as f:
+    with open(f"./ttyp/static/{language}.txt") as f:
         for word in f:
             all_words.append(word.strip("\n"))
     return [all_words[randint(0, len(all_words)-1)] for _ in range(word_count)]
 
 
-to_write = random_words()
-lexer = TtypeLexer(to_write)
+def main():
+    args = get_args()
+    to_write = random_words(language=args.language, word_count=args.count)
+    lexer = TtypeLexer(to_write)
 
+    ttype = Ttype(to_write)
 
-ttype = Ttype(to_write)
+    def on_change(buffer: Buffer):
+        global start
+        if not buffer.start:
+            buffer.start = time.time()
+        typed = buffer.text.split()
+        if len(typed) >= len(to_write) and typed[-1] == to_write[-1]:
+            elapsed = time.time() - buffer.start
+            wpm = ttype.get_wpm(typed, elapsed)
+            acc = ttype.get_acc(typed)
+            buffer.app.exit(result={"wpm": wpm, "acc": acc})
 
+    def on_insert(buffer: Buffer):
+        typed = buffer.text
+        ttype.insert_char(typed)
 
-def on_change(buffer: Buffer):
-    global start
-    if not start:
-        start = time.time()
-    typed = buffer.text.split()
-    if len(typed) >= len(to_write) and typed[-1] == to_write[-1]:
-        elapsed = time.time() - start
-        wpm = ttype.get_wpm(typed, elapsed)
-        acc = ttype.get_acc(typed)
-        buffer.app.exit(result={"wpm": wpm, "acc": acc})
+    buffer = Buffer(on_text_changed=on_change, on_text_insert=on_insert)
 
+    kb = KeyBindings()
 
-def on_insert(buffer: Buffer):
-    typed = buffer.text
-    ttype.insert_char(typed)
+    @kb.add('c-c')
+    def exit_(event: KeyPressEvent):
+        event.app.exit()
 
+    @kb.add('enter')
+    def disable_enter(event: KeyPressEvent):
+        pass
 
-buffer = Buffer(on_text_changed=on_change, on_text_insert=on_insert)
+    root_container = HSplit([
+        Window(BufferControl(buffer=buffer, lexer=lexer), wrap_lines=True)
+    ])
 
-kb = KeyBindings()
+    layout = Layout(root_container)
 
-start = None
+    style = Style.from_dict({
+        "ghost": "#999999",
+        "wrong": "#cc0000",
+        "written": "",
+    })
 
-
-@kb.add('c-c')
-def exit_(event: KeyPressEvent):
-    event.app.exit()
-
-
-@kb.add('enter')
-def disable_enter(event: KeyPressEvent):
-    pass
-
-
-root_container = HSplit([
-    Window(BufferControl(buffer=buffer, lexer=lexer))
-])
-
-layout = Layout(root_container)
-
-style = Style.from_dict({
-    "ghost": "#999999",
-    "wrong": "#cc0000",
-    "written": "",
-})
-
-app = Application(
-    layout=layout,
-    key_bindings=kb,
-    full_screen=False,
-    style=style
-)
-buffer.app = app
-
-if __name__ == '__main__':
+    app = Application(
+        layout=layout,
+        key_bindings=kb,
+        full_screen=False,
+        style=style
+    )
+    buffer.app = app
+    buffer.start = None
     result = app.run()
     if result:
         wpm = result.get("wpm")
         acc = result.get("acc")
         print(f"\n{wpm:.1f} wpm")
         print(f"{acc*100:.1f}% acc")
+
+
+if __name__ == '__main__':
+    main()
