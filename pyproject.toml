@@ -1,8 +1,9 @@
 [project]
 name = "ttyp"
-version = "0.1.2"
+version = "0.1.4"
 description = "CLI typing test"
 readme = "README.md"
+license = { expression = "MIT" }
 requires-python = ">=3.10"
 dependencies = [
     "prompt-toolkit>=3.0.51",
