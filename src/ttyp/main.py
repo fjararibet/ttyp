@@ -9,6 +9,8 @@ from prompt_toolkit.document import Document
 from random import randint
 import time
 from .args import get_args
+from .languages.english import english
+from .languages.spanish import spanish
 
 
 class Ttype():
@@ -134,9 +136,10 @@ class TtypeLexer(Lexer):
 
 def random_words(language: str, word_count: int):
     all_words = []
-    with open(f"./src/static/{language}.txt") as f:
-        for word in f:
-            all_words.append(word.strip("\n"))
+    if language == "english":
+        all_words = english
+    if language == "spanish":
+        all_words = spanish
     return [all_words[randint(0, len(all_words)-1)] for _ in range(word_count)]
 
 
