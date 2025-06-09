@@ -13,7 +13,7 @@ from .languages.english import english
 from .languages.spanish import spanish
 
 
-class Ttype():
+class Ttyp():
     def __init__(self, to_write: [str]):
         self.written: str = []
         self.to_write: [str] = to_write
@@ -90,7 +90,7 @@ class Ttype():
         return correct_chars / (correct_chars + incorrect_chars)
 
 
-class TtypeLexer(Lexer):
+class TtypLexer(Lexer):
     def __init__(self, to_write, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.to_write = to_write
@@ -146,9 +146,9 @@ def random_words(language: str, word_count: int):
 def main():
     args = get_args()
     to_write = random_words(language=args.language, word_count=args.count)
-    lexer = TtypeLexer(to_write)
+    lexer = TtypLexer(to_write)
 
-    ttype = Ttype(to_write)
+    ttyp = Ttyp(to_write)
 
     def on_change(buffer: Buffer):
         global start
@@ -157,13 +157,13 @@ def main():
         typed = buffer.text.split()
         if len(typed) >= len(to_write) and typed[-1] == to_write[-1]:
             elapsed = time.time() - buffer.start
-            wpm = ttype.get_wpm(typed, elapsed)
-            acc = ttype.get_acc(typed)
+            wpm = ttyp.get_wpm(typed, elapsed)
+            acc = ttyp.get_acc(typed)
             buffer.app.exit(result={"wpm": wpm, "acc": acc})
 
     def on_insert(buffer: Buffer):
         typed = buffer.text
-        ttype.insert_char(typed)
+        ttyp.insert_char(typed)
 
     buffer = Buffer(on_text_changed=on_change, on_text_insert=on_insert)
 
