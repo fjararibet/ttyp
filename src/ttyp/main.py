@@ -25,27 +25,31 @@ class Ttyp():
     def set_written(self, written: str):
         self.written = written
 
-    def insert_char(self, typed: str):
+    def insert_char(self, typed: str, cursor_position: int):
         """Should be called on all inserted chars, even if they
         are later deleted, so the mistake tracking is accurate.
-        For now it assumes that the rightmost char is the last inserted,
-        which is not correct, since the user can move the cursor."
-        TODO: Account for cursor position.
         """
-        typed_words = typed.split()
-        last_typed_word = typed_words[-1]
-        last_inserted_char = last_typed_word[-1]
+        last_inserted_char = typed[cursor_position-1]
         if (last_inserted_char == " "):
-            return
+            to_write_text = " ".join(self.to_write)
+            next_space_pos = to_write_text.find(" ", cursor_position-1)
+            if next_space_pos != cursor_position-1:
+                self.mistakes += next_space_pos - cursor_position + 1
+            return next_space_pos + 1
+        typed_words = typed.split()
+        if len(typed_words) == 0:
+            return cursor_position
+        last_typed_word = typed_words[-1]
         if (len(typed_words) > len(self.to_write)):
-            return
+            return cursor_position
         curr_target_word = self.to_write[len(typed_words)-1]
         if (len(last_typed_word) > len(curr_target_word)):
             self.mistakes += 1
-            return
+            return cursor_position
 
         if (last_inserted_char != curr_target_word[len(last_typed_word)-1]):
             self.mistakes += 1
+        return cursor_position
 
     def _number_of_correct_chars(self, typed: str):
         result = 0
@@ -163,7 +167,11 @@ def main():
 
     def on_insert(buffer: Buffer):
         typed = buffer.text
-        ttyp.insert_char(typed)
+        cursor_position = buffer.cursor_position
+        new_cursor_position = ttyp.insert_char(typed, cursor_position)
+        diff = new_cursor_position - cursor_position
+        buffer.text += " " * diff
+        buffer.cursor_position += diff
 
     buffer = Buffer(on_text_changed=on_change, on_text_insert=on_insert)
 
