@@ -20,12 +20,10 @@ class TtypLexer(Lexer):
         def get_line(lineno):
             line = document.lines[lineno]
             tokens = []
+            # here it needs to be word by word instead of char by char
+            # to account for extra letters the user might have typed
+            # in a word.
             for written_word, to_write_word in zip(line.split(), self.to_write.split()):
-                if written_word == to_write_word:
-                    tokens.append(("class:written", written_word))
-                    tokens.append(("", " "))
-                    continue
-
                 # char by char
                 min_len = min(len(written_word), len(to_write_word))
                 for i, j in zip(written_word, to_write_word):
@@ -43,6 +41,8 @@ class TtypLexer(Lexer):
                     tokens.append((f"class:{style}", c))
 
                 tokens.append(("", " "))
+
+            # words left to type
             for i, word in enumerate(self.to_write.split()):
                 if i < len(line.split()):
                     continue
