@@ -43,9 +43,8 @@ class TtypLexer(Lexer):
                 tokens.append(("", " "))
 
             # words left to type
-            for i, word in enumerate(self.to_write.split()):
-                if i < len(line.split()):
-                    continue
+            written_wcount = len(line.split())
+            for i, word in enumerate(self.to_write.split()[written_wcount:]):
                 tokens.append(("class:ghost", word))
                 tokens.append(("", " "))
 
