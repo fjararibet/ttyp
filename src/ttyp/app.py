@@ -20,14 +20,34 @@ class TtypLexer(Lexer):
         def get_line(lineno):
             line = document.lines[lineno]
             tokens = []
-            for written_char, target_char in zip(line, self.to_write):
-                style = "written" if written_char == target_char else "wrong"
-                tokens.append((f"class:{style}", written_char))
+            for written_word, to_write_word in zip(line.split(), self.to_write.split()):
+                if written_word == to_write_word:
+                    tokens.append(("class:written", written_word))
+                    tokens.append(("", " "))
+                    continue
 
-            # leftover
-            min_len = min(len(line), len(self.to_write))
-            for c in self.to_write[min_len:]:
-                tokens.append(("class:ghost", c))
+                # char by char
+                min_len = min(len(written_word), len(to_write_word))
+                for i, j in zip(written_word, to_write_word):
+                    style = "written" if i == j else "wrong"
+                    tokens.append((f"class:{style}", i))
+
+                # leftover written word
+                for c in written_word[min_len:]:
+                    style = "wrong"
+                    tokens.append((f"class:{style}", c))
+
+                # leftover target word
+                for c in to_write_word[min_len:]:
+                    style = "ghost"
+                    tokens.append((f"class:{style}", c))
+
+                tokens.append(("", " "))
+            for i, word in enumerate(self.to_write.split()):
+                if i < len(line.split()):
+                    continue
+                tokens.append(("class:ghost", word))
+                tokens.append(("", " "))
 
             return tokens
 
@@ -54,7 +74,6 @@ class TtypApp():
         style = Style.from_dict({
             "ghost": "#999999",
             "wrong": "#cc0000",
-            "wrong_space": "underline fg:red",
             "written": "",
         })
 
