@@ -103,12 +103,11 @@ class TtypApp():
 
     def on_change(self, buffer: TtypBuffer):
         ttyp = buffer.ttyp
-        if not ttyp.start:
-            ttyp.start = time.time()
+        if not ttyp._start:
+            ttyp._start = time.time()
         typed = buffer.text.split()
         if len(typed) >= len(self._to_write) and typed[-1] == self._to_write[-1]:
-            elapsed = time.time() - ttyp.start
-            wpm = ttyp.get_wpm(typed, elapsed)
+            wpm = ttyp.get_wpm(typed)
             acc = ttyp.get_acc(typed)
             self._app.exit(result={"wpm": wpm, "acc": acc})
 

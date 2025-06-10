@@ -1,9 +1,13 @@
+import time
+
 class Ttyp():
+    """Handle all game state"""
+
     def __init__(self, to_write: [str]):
         self.written: str = []
         self.to_write: [str] = to_write
         self.mistakes: int = 0
-        self.start = None
+        self._start = None
 
     def add_word(self, word: str):
         self.written.append(word)
@@ -15,6 +19,8 @@ class Ttyp():
         """Should be called on all inserted chars, even if they
         are later deleted, so the mistake tracking is accurate.
         """
+        if not self._start:
+            self._start = time.time()
         last_inserted_char = typed[cursor_position-1]
         if (last_inserted_char == " "):
             to_write_text = " ".join(self.to_write)
@@ -69,7 +75,8 @@ class Ttyp():
 
         return result
 
-    def get_wpm(self, typed: str, elapsed):
+    def get_wpm(self, typed: str):
+        elapsed = time.time() - self._start
         correct_chars = self._number_of_correct_chars(typed)
         wpm = correct_chars / 5 * 60 / elapsed
         return wpm
