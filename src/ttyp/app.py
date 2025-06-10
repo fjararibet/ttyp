@@ -20,7 +20,7 @@ class TtypLexer(Lexer):
         def get_line(lineno):
             line = document.lines[lineno]
             tokens = []
-            for written_word, to_write_word in zip(line.split(), self.to_write):
+            for written_word, to_write_word in zip(line.split(), self.to_write.split()):
                 if written_word == to_write_word:
                     tokens.append(("class:written", written_word))
                     tokens.append(("", " "))
@@ -43,7 +43,7 @@ class TtypLexer(Lexer):
                     tokens.append((f"class:{style}", c))
 
                 tokens.append(("", " "))
-            for i, word in enumerate(self.to_write):
+            for i, word in enumerate(self.to_write.split()):
                 if i < len(line.split()):
                     continue
                 tokens.append(("class:ghost", word))
@@ -106,7 +106,7 @@ class TtypApp():
         if not ttyp._start:
             ttyp._start = time.time()
         typed = buffer.text.split()
-        if len(typed) >= len(self._to_write) and typed[-1] == self._to_write[-1]:
+        if len(typed) >= len(self._to_write.split()) and typed[-1] == self._to_write.split()[-1]:
             wpm = ttyp.get_wpm(typed)
             acc = ttyp.get_acc(typed)
             self._app.exit(result={"wpm": wpm, "acc": acc})

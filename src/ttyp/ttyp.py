@@ -23,8 +23,7 @@ class Ttyp():
             self._start = time.time()
         last_inserted_char = typed[cursor_position-1]
         if (last_inserted_char == " "):
-            to_write_text = " ".join(self.to_write)
-            next_space_pos = to_write_text.find(" ", cursor_position-1)
+            next_space_pos = self.to_write.find(" ", cursor_position-1)
             if next_space_pos != cursor_position-1:
                 self.mistakes += next_space_pos - cursor_position + 1
             return next_space_pos + 1
@@ -32,9 +31,9 @@ class Ttyp():
         if len(typed_words) == 0:
             return cursor_position
         last_typed_word = typed_words[-1]
-        if (len(typed_words) > len(self.to_write)):
+        if (len(typed_words) > len(self.to_write.split())):
             return cursor_position
-        curr_target_word = self.to_write[len(typed_words)-1]
+        curr_target_word = self.to_write.split()[len(typed_words)-1]
         if (len(last_typed_word) > len(curr_target_word)):
             self.mistakes += 1
             return cursor_position
@@ -45,7 +44,7 @@ class Ttyp():
 
     def _number_of_correct_chars(self, typed: str):
         result = 0
-        for typed_word, correct_word in zip(typed, self.to_write):
+        for typed_word, correct_word in zip(typed, self.to_write.split()):
             if typed_word == correct_word:
                 result += len(typed_word) + 1  # account for space
                 continue
@@ -55,13 +54,13 @@ class Ttyp():
                 result += 1
         # A space each counted for each word,
         # but the last one doesn't have a space
-        if typed[-1] == self.to_write[-1]:
+        if typed[-1] == self.to_write.split()[-1]:
             result -= 1
         return result
 
     def _number_of_incorrect_chars(self, typed: str):
         result = 0
-        for typed_word, correct_word in zip(typed, self.to_write):
+        for typed_word, correct_word in zip(typed, self.to_write.split()):
             if typed_word == correct_word:
                 continue
             for i, j in zip(typed_word, correct_word):
