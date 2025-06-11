@@ -7,7 +7,6 @@ def get_args():
         "-l",
         "--language",
         type=str,
-        choices=["english", "spanish"],
         default="english",
         help="Language"
     )
