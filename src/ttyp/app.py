@@ -104,10 +104,10 @@ class TtypApp():
         ttyp = buffer.ttyp
         if not ttyp._start:
             ttyp._start = time.time()
-        typed = buffer.text.split()
-        if len(typed) >= len(self._to_write.split()) and typed[-1] == self._to_write.split()[-1]:
-            wpm = ttyp.get_wpm(typed)
-            acc = ttyp.get_acc(typed)
+        ttyp.set_typed(buffer.text)
+        if ttyp.is_done():
+            wpm = ttyp.get_wpm()
+            acc = ttyp.get_acc()
             self._app.exit(result={"wpm": wpm, "acc": acc})
 
     def on_insert(self, buffer: TtypBuffer):
