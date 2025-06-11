@@ -11,9 +11,9 @@ from .ttyp import Ttyp
 
 
 class TtypLexer(Lexer):
-    def __init__(self, to_write, *args, **kwargs):
+    def __init__(self, to_type, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.to_write = to_write
+        self.to_type = to_type
 
     def lex_document(self, document: Document):
 
@@ -23,28 +23,28 @@ class TtypLexer(Lexer):
             # here it needs to be word by word instead of char by char
             # to account for extra letters the user might have typed
             # in a word.
-            for written_word, to_write_word in zip(line.split(), self.to_write.split()):
+            for typed_word, word_to_type in zip(line.split(), self.to_type.split()):
                 # char by char
-                min_len = min(len(written_word), len(to_write_word))
-                for i, j in zip(written_word, to_write_word):
-                    style = "written" if i == j else "wrong"
+                min_len = min(len(typed_word), len(word_to_type))
+                for i, j in zip(typed_word, word_to_type):
+                    style = "typed" if i == j else "wrong"
                     tokens.append((f"class:{style}", i))
 
-                # leftover written word
-                for c in written_word[min_len:]:
+                # leftover typed word
+                for c in typed_word[min_len:]:
                     style = "wrong"
                     tokens.append((f"class:{style}", c))
 
                 # leftover target word
-                for c in to_write_word[min_len:]:
+                for c in word_to_type[min_len:]:
                     style = "ghost"
                     tokens.append((f"class:{style}", c))
 
                 tokens.append(("", " "))
 
             # words left to type
-            written_wcount = len(line.split())
-            for i, word in enumerate(self.to_write.split()[written_wcount:]):
+            typed_wcount = len(line.split())
+            for i, word in enumerate(self.to_type.split()[typed_wcount:]):
                 tokens.append(("class:ghost", word))
                 tokens.append(("", " "))
 
@@ -60,11 +60,11 @@ class TtypBuffer(Buffer):
 
 
 class TtypApp():
-    def __init__(self, ttyp: Ttyp, to_write: [str]):
-        self._to_write = to_write
+    def __init__(self, ttyp: Ttyp, to_type: [str]):
+        self._to_type = to_type
         buffer = TtypBuffer(ttyp=ttyp, on_text_changed=self.on_change,
                             on_text_insert=self.on_insert)
-        lexer = TtypLexer(to_write=to_write)
+        lexer = TtypLexer(to_type=to_type)
         root_container = HSplit([
             Window(BufferControl(buffer=buffer, lexer=lexer), wrap_lines=True)
         ])
@@ -73,7 +73,7 @@ class TtypApp():
         style = Style.from_dict({
             "ghost": "#999999",
             "wrong": "#cc0000",
-            "written": "",
+            "typed": "",
         })
 
         self._app = Application(
@@ -119,4 +119,4 @@ class TtypApp():
         # cursor can't be moved if the buffer is not big enough,
         # so spaces are added
         buffer.text += " " * diff
-        buffer.cursor_position += diff
+        buffer.cursor_position = new_cursor_position

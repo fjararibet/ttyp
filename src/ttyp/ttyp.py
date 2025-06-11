@@ -4,10 +4,9 @@ import time
 class Ttyp():
     """Handle all game state"""
 
-    def __init__(self, to_write: [str]):
-        self.written: str = []
+    def __init__(self, to_type: [str]):
         self._typed: str
-        self._to_write: [str] = to_write
+        self._to_type: [str] = to_type
         self.mistakes: int = 0
         self._start = None
 
@@ -16,26 +15,38 @@ class Ttyp():
 
     def is_done(self):
         typed_words = self._typed.split()
-        in_final_word = len(typed_words) >= len(self._to_write.split())
-        final_word_ended = typed_words[-1] == self._to_write.split()[-1] or self._typed[-1] == " "
+        in_final_word = len(typed_words) >= len(self._to_type.split())
+        final_word_ended = typed_words[-1] == self._to_type.split()[-1] or self._typed[-1] == " "
         return in_final_word and final_word_ended
 
     def insert_char(self, typed: str, cursor_position: int):
         if not self._start:
             self._start = time.time()
         last_inserted_char = typed[cursor_position-1]
-        if (last_inserted_char == " "):
-            next_space_pos = self._to_write.find(" ", cursor_position-1)
-            if next_space_pos != cursor_position-1:
-                self.mistakes += next_space_pos - cursor_position + 1
-            return next_space_pos + 1
         typed_words = typed.split()
+        if (last_inserted_char == " "):
+            if typed_words[-1] == self._to_type.split()[len(typed_words)-1]:
+                return cursor_position
+            typed_wcount = len(self._typed.split())
+            to_type_wcount = 0
+            next_space_pos = 0
+            for c in self._to_type:
+                if to_type_wcount >= typed_wcount:
+                    break
+                next_space_pos += 1
+                if c == " ":
+                    to_type_wcount += 1
+            if next_space_pos > cursor_position-1:
+                self.mistakes += next_space_pos - cursor_position
+                return next_space_pos
+            else:
+                return cursor_position
         if len(typed_words) == 0:
             return cursor_position
         last_typed_word = typed_words[-1]
-        if (len(typed_words) > len(self._to_write.split())):
+        if (len(typed_words) > len(self._to_type.split())):
             return cursor_position
-        curr_target_word = self._to_write.split()[len(typed_words)-1]
+        curr_target_word = self._to_type.split()[len(typed_words)-1]
         if (len(last_typed_word) > len(curr_target_word)):
             self.mistakes += 1
             return cursor_position
@@ -47,7 +58,7 @@ class Ttyp():
     def _number_of_correct_chars(self):
         """Counts the correctly typed characters at the end of the test"""
         result = 0
-        for typed_word, correct_word in zip(self._typed.split(), self._to_write.split()):
+        for typed_word, correct_word in zip(self._typed.split(), self._to_type.split()):
             if typed_word == correct_word:
                 result += len(typed_word) + 1  # account for space
                 continue
