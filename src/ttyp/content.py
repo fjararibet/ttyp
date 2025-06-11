@@ -5,7 +5,7 @@ from random import randint
 
 
 def random_words(language: str, word_count: int):
-    package = "src.static.languages"
+    package = "ttyp.static.languages"
     with importlib.resources.open_text(package, f'{language}.json') as f:
         data = json.load(f)
         chosen_word_list = [
@@ -16,7 +16,7 @@ def random_words(language: str, word_count: int):
 
 
 def get_available_languages():
-    package = "src.static.languages"
+    package = "ttyp.static.languages"
     with importlib.resources.files(package) as data_dir:
         return [
             Path(entry.name).stem
