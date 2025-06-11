@@ -9,3 +9,6 @@ pip install ttyp
 ```
 ttyp --language english --count 25
 ```
+
+## Credits
+Language word lists are attributed to the one and only [monkeytype](https://github.com/monkeytypegame/monkeytype) project.
