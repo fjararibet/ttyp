@@ -102,8 +102,6 @@ class TtypApp():
 
     def on_change(self, buffer: TtypBuffer):
         ttyp = buffer.ttyp
-        if not ttyp._start:
-            ttyp._start = time.time()
         ttyp.set_typed(buffer.text)
         if ttyp.is_done():
             wpm = ttyp.get_wpm()
