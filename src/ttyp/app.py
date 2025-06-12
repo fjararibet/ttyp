@@ -6,7 +6,6 @@ from prompt_toolkit.layout.controls import BufferControl
 from prompt_toolkit.lexers import Lexer
 from prompt_toolkit.styles import Style
 from prompt_toolkit.document import Document
-import time
 from .ttyp import Ttyp
 
 
@@ -102,19 +101,28 @@ class TtypApp():
 
     def on_change(self, buffer: TtypBuffer):
         ttyp = buffer.ttyp
+
+        ttyp.set_cursor_position(buffer.cursor_position)
         ttyp.set_typed(buffer.text)
+
+        # set_typed has side effects so the state
+        # has to be updated
+        buffer.cursor_position = ttyp.get_cursor_position()
+        buffer.text = ttyp.get_typed()
+
         if ttyp.is_done():
             wpm = ttyp.get_wpm()
             acc = ttyp.get_acc()
             self._app.exit(result={"wpm": wpm, "acc": acc})
 
     def on_insert(self, buffer: TtypBuffer):
-        typed = buffer.text
         ttyp = buffer.ttyp
         cursor_position = buffer.cursor_position
-        new_cursor_position = ttyp.insert_char(typed, cursor_position)
+        ttyp.insert_char()
+        new_cursor_position = ttyp.get_cursor_position()
         diff = new_cursor_position - cursor_position
         # cursor can't be moved if the buffer is not big enough,
         # so spaces are added
         buffer.text += " " * diff
+        ttyp.set_typed(buffer.text)
         buffer.cursor_position = new_cursor_position
