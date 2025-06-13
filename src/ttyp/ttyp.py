@@ -59,7 +59,8 @@ class Ttyp():
                 return
 
             start_of_word = len(self._typed) >= 2 and self._to_type[self._cursor_position-2] == " "
-            if start_of_word:
+            start_of_test = len(self._typed.strip()) == 0
+            if start_of_word or start_of_test:
                 # keep cursor in place
                 self._cursor_position -= 1
                 return
