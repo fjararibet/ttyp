@@ -59,7 +59,7 @@ class TtypBuffer(Buffer):
 
 
 class TtypApp():
-    def __init__(self, ttyp: Ttyp, to_type: [str]):
+    def __init__(self, ttyp: Ttyp, to_type: [str], erase_when_done: bool):
         self._to_type = to_type
         buffer = TtypBuffer(ttyp=ttyp, on_text_changed=self.on_change,
                             on_text_insert=self.on_insert)
@@ -74,12 +74,12 @@ class TtypApp():
             "wrong": "#cc0000",
             "typed": "",
         })
-
         self._app = Application(
             layout=layout,
             key_bindings=self._create_keybindins(),
             full_screen=False,
-            style=style
+            style=style,
+            erase_when_done=erase_when_done,
         )
 
     def run(self):
@@ -113,7 +113,15 @@ class TtypApp():
         if ttyp.is_done():
             wpm = ttyp.get_wpm()
             acc = ttyp.get_acc()
-            self._app.exit(result={"wpm": wpm, "acc": acc})
+            correct = ttyp.get_correct()
+            mistakes = ttyp.get_mistakes()
+            self._app.exit(
+                result={
+                    "wpm": wpm,
+                    "acc": acc,
+                    "correct": correct,
+                    "mistakes": mistakes,
+                })
 
     def on_insert(self, buffer: TtypBuffer):
         ttyp = buffer.ttyp

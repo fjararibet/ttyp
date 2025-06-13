@@ -25,6 +25,12 @@ class Ttyp():
 
     def get_typed(self):
         return self._typed
+    
+    def get_mistakes(self):
+        return self._mistakes
+
+    def get_correct(self):
+        return self._number_of_correct_chars()
 
     def _on_backspace(self):
         if not self._typed or not self._cursor_position:

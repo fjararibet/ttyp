@@ -21,5 +21,7 @@ def get_args():
     parser.add_argument("-c", "--count", type=int, default=25, help="Word count to be typed")
     parser.add_argument("-L", "--list-languages", action="store_true",
                         help="List available languages")
+    parser.add_argument("-q", "--quiet", action="count", default=0, help="Decrease output, can be used multiple times")
+    parser.add_argument("-v", "--verbose", action="count", default=1, help="Increase output, can be used multiple times")
 
     return parser.parse_args()

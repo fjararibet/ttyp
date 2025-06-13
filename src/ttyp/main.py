@@ -11,15 +11,26 @@ def main():
         languages = get_available_languages()
         print("\n".join(languages))
         return
+    verbosity_level = args.verbose - args.quiet
     to_type = random_words(language=args.language, word_count=args.count)
     ttyp = Ttyp(to_type=to_type)
-    app = TtypApp(to_type=to_type, ttyp=ttyp)
+    app = TtypApp(
+        to_type=to_type,
+        ttyp=ttyp,
+        erase_when_done=verbosity_level <= 0
+    )
     result = app.run()
-    if result:
+    if result and verbosity_level >= 0:
         wpm = result.get("wpm")
         acc = result.get("acc")
         print(f"\n{wpm:.1f} wpm")
         print(f"{acc*100:.1f}% acc")
+
+    if result and verbosity_level >= 2:
+        correct = result.get("correct")
+        mistakes = result.get("mistakes")
+        print(f"{mistakes} mistakes")
+        print(f"{correct} correct")
 
 
 if __name__ == '__main__':
