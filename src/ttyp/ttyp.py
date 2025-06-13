@@ -36,11 +36,20 @@ class Ttyp():
         if not self._typed or not self._cursor_position:
             return
         is_start_of_word = self._typed[self._cursor_position-2] != " "
+        is_prev_word_right = (
+            self._typed.split()[-1] == self._to_type.split()[len(self._typed.split())-1]
+        )
+        if is_start_of_word and is_prev_word_right:
+            self._typed += " "
+            self._cursor_position += 1
+            return
+
         while self._typed[self._cursor_position-2] == " ":
             self._cursor_position -= 1
         self._typed = self._typed.rstrip()
-        if is_start_of_word:
-            self._typed = self._typed + " "
+        # if is_start_of_word:
+        # print("here")
+        # self._typed = self._typed + " "
 
     def is_done(self):
         if not self._typed.strip():
