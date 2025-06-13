@@ -25,7 +25,7 @@ class Ttyp():
 
     def get_typed(self):
         return self._typed
-    
+
     def get_mistakes(self):
         return self._mistakes
 
@@ -41,7 +41,7 @@ class Ttyp():
         self._typed = self._typed[:self._cursor_position] + self._typed[end_index:]
 
     def is_done(self):
-        if not self._typed:
+        if not self._typed.strip():
             return
         typed_words = self._typed.split()
         in_final_word = len(typed_words) >= len(self._to_type.split())
@@ -55,6 +55,9 @@ class Ttyp():
         typed_words = self._typed.split()
         if (last_inserted_char == " "):
             if self._to_type[self._cursor_position-1] == " ":
+                return
+            if len(self._typed) >= 2 and self._to_type[self._cursor_position-2] == " ":
+                self._cursor_position -= 1
                 return
             typed_wcount = len(self._typed.split())
             to_type_wcount = 0

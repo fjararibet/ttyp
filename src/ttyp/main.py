@@ -23,7 +23,7 @@ def main():
     if result and verbosity_level >= 0:
         wpm = result.get("wpm")
         acc = result.get("acc")
-        print(f"\n{wpm:.1f} wpm")
+        print(f"{wpm:.1f} wpm")
         print(f"{acc*100:.1f}% acc")
 
     if result and verbosity_level >= 2:
