@@ -35,10 +35,12 @@ class Ttyp():
     def _on_backspace(self):
         if not self._typed or not self._cursor_position:
             return
-        end_index = self._cursor_position
+        is_start_of_word = self._typed[self._cursor_position-2] != " "
         while self._typed[self._cursor_position-2] == " ":
             self._cursor_position -= 1
-        self._typed = self._typed[:self._cursor_position-1] + self._typed[end_index:]
+        self._typed = self._typed.rstrip()
+        if is_start_of_word:
+            self._typed = self._typed + " "
 
     def is_done(self):
         if not self._typed.strip():
