@@ -117,11 +117,11 @@ class TtypApp():
 
         ttyp.set_cursor_position(buffer.cursor_position)
         ttyp.set_typed(buffer.text)
-
         # set_typed has side effects so the state
         # has to be updated
-        buffer.cursor_position = ttyp.get_cursor_position()
+        new_cursor_position = ttyp.get_cursor_position()
         buffer.text = ttyp.get_typed()
+        buffer.cursor_position = new_cursor_position
 
     def _on_cursor_change(self, buffer: TtypBuffer):
         ttyp = buffer.ttyp
@@ -158,4 +158,4 @@ class TtypApp():
                 })
 
     def _debug(self, text: str):
-        self._debug_buffer.text += text + " "
+        self._debug_buffer.text += str(text) + " "
