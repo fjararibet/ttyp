@@ -61,8 +61,8 @@ class TtypBuffer(Buffer):
 class TtypApp():
     def __init__(self, ttyp: Ttyp, to_type: [str], erase_when_done: bool):
         self._to_type = to_type
-        buffer = TtypBuffer(ttyp=ttyp, on_text_changed=self.on_change,
-                            on_text_insert=self.on_insert)
+        buffer = TtypBuffer(ttyp=ttyp, on_text_changed=self._on_change,
+                            on_text_insert=self._on_insert)
         lexer = TtypLexer(to_type=to_type)
         root_container = HSplit([
             Window(BufferControl(buffer=buffer, lexer=lexer), wrap_lines=True)
@@ -99,7 +99,7 @@ class TtypApp():
 
         return kb
 
-    def on_change(self, buffer: TtypBuffer):
+    def _on_change(self, buffer: TtypBuffer):
         ttyp = buffer.ttyp
 
         ttyp.set_cursor_position(buffer.cursor_position)
@@ -110,7 +110,7 @@ class TtypApp():
         buffer.cursor_position = ttyp.get_cursor_position()
         buffer.text = ttyp.get_typed()
 
-    def on_insert(self, buffer: TtypBuffer):
+    def _on_insert(self, buffer: TtypBuffer):
         ttyp = buffer.ttyp
         cursor_position = buffer.cursor_position
         ttyp.insert_char()
