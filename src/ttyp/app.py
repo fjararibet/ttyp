@@ -61,8 +61,12 @@ class TtypBuffer(Buffer):
 class TtypApp():
     def __init__(self, ttyp: Ttyp, to_type: [str], erase_when_done: bool):
         self._to_type = to_type
-        buffer = TtypBuffer(ttyp=ttyp, on_text_changed=self._on_change,
-                            on_text_insert=self._on_insert)
+        buffer = TtypBuffer(
+            ttyp=ttyp,
+            on_text_changed=self._on_change,
+            on_text_insert=self._on_insert,
+            on_cursor_position_changed=self._on_cursor_change
+        )
         lexer = TtypLexer(to_type=to_type)
         root_container = HSplit([
             Window(BufferControl(buffer=buffer, lexer=lexer), wrap_lines=True)
@@ -98,6 +102,8 @@ class TtypApp():
             pass
 
         return kb
+    # the following functions are defined in the order they
+    # are ran on text insert
 
     def _on_change(self, buffer: TtypBuffer):
         ttyp = buffer.ttyp
@@ -110,18 +116,26 @@ class TtypApp():
         buffer.cursor_position = ttyp.get_cursor_position()
         buffer.text = ttyp.get_typed()
 
+    def _on_cursor_change(self, buffer: TtypBuffer):
+        ttyp = buffer.ttyp
+        target = ttyp.get_cursor_position()
+        if buffer.cursor_position != target:
+            buffer.cursor_position = target
+
     def _on_insert(self, buffer: TtypBuffer):
         ttyp = buffer.ttyp
         cursor_position = buffer.cursor_position
         ttyp.insert_char()
         new_cursor_position = ttyp.get_cursor_position()
-        diff = new_cursor_position - cursor_position
+
         # cursor can't be moved if the buffer is not big enough,
         # so spaces are added
+        diff = new_cursor_position - cursor_position
         buffer.text += " " * diff
-        ttyp.set_typed(buffer.text)
+
+        # reset becasuse on_change was triggered with old value
+        ttyp.set_cursor_position(new_cursor_position)
         buffer.cursor_position = new_cursor_position
-        buffer.text = ttyp.get_typed()
 
         if ttyp.is_done():
             wpm = ttyp.get_wpm()
