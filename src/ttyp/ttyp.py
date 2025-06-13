@@ -49,7 +49,7 @@ class Ttyp():
         in_final_word = len(typed_words) >= len(self._to_type.split())
 
         is_final_word_correct = typed_words[-1] == self._to_type.split()[-1]
-        is_space_in_final_word = self._typed[-1] == " "
+        is_space_in_final_word = self._typed[self._cursor_position-1] == " "
         final_word_ended = is_final_word_correct or is_space_in_final_word
 
         return in_final_word and final_word_ended
@@ -60,15 +60,18 @@ class Ttyp():
         last_inserted_char = self._typed[self._cursor_position-1]
         typed_words = self._typed.split()
         if (last_inserted_char == " "):
-            correctly_typed = self._to_type[self._cursor_position-1] == " "
-            if correctly_typed:
-                return
-
-            start_of_word = len(self._typed) >= 2 and self._to_type[self._cursor_position-2] == " "
+            start_of_word = (
+                len(self._typed) >= 2
+                and self._typed[self._cursor_position-2] == " "
+            )
             start_of_test = len(self._typed.strip()) == 0
             if start_of_word or start_of_test:
                 # keep cursor in place
                 self._cursor_position -= 1
+                return
+
+            correctly_typed = len(typed_words[-1]) == len(self._to_type.split()[len(typed_words)-1])
+            if correctly_typed:
                 return
 
             # go to next word
