@@ -36,9 +36,9 @@ class Ttyp():
         if not self._typed or not self._cursor_position:
             return
         end_index = self._cursor_position
-        while self._typed[self._cursor_position-1] == " ":
+        while self._typed[self._cursor_position-2] == " ":
             self._cursor_position -= 1
-        self._typed = self._typed[:self._cursor_position] + self._typed[end_index:]
+        self._typed = self._typed[:self._cursor_position-1] + self._typed[end_index:]
 
     def is_done(self):
         if not self._typed.strip():
