@@ -48,8 +48,8 @@ class Ttyp():
         last_inserted_char = self._typed[self._cursor_position-1]
         typed_words = self._typed.split()
         if (last_inserted_char == " "):
-            if typed_words[-1] == self._to_type.split()[len(typed_words)-1]:
-                return self._cursor_position
+            if self._to_type[self._cursor_position-1] == " ":
+                return
             typed_wcount = len(self._typed.split())
             to_type_wcount = 0
             next_space_pos = 0
@@ -62,22 +62,19 @@ class Ttyp():
             if next_space_pos > self._cursor_position-1:
                 self._mistakes += next_space_pos - self._cursor_position
                 self._cursor_position = next_space_pos
-                return next_space_pos
-            else:
-                return self._cursor_position
+            return
         if len(typed_words) == 0:
-            return self._cursor_position
+            return
         last_typed_word = typed_words[-1]
         if (len(typed_words) > len(self._to_type.split())):
-            return self._cursor_position
+            return
         curr_target_word = self._to_type.split()[len(typed_words)-1]
         if (len(last_typed_word) > len(curr_target_word)):
             self._mistakes += 1
-            return self._cursor_position
+            return
 
         if (last_inserted_char != curr_target_word[len(last_typed_word)-1]):
             self._mistakes += 1
-        return self._cursor_position
 
     def _number_of_correct_chars(self):
         """Counts the correctly typed characters at the end of the test"""
