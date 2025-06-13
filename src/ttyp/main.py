@@ -17,7 +17,8 @@ def main():
     app = TtypApp(
         to_type=to_type,
         ttyp=ttyp,
-        erase_when_done=verbosity_level <= 0
+        erase_when_done=verbosity_level <= 0,
+        debug=args.debug
     )
     result = app.run()
     if result and verbosity_level >= 0:

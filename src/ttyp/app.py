@@ -59,7 +59,7 @@ class TtypBuffer(Buffer):
 
 
 class TtypApp():
-    def __init__(self, ttyp: Ttyp, to_type: [str], erase_when_done: bool):
+    def __init__(self, ttyp: Ttyp, to_type: [str], erase_when_done: bool, debug: bool = False):
         self._to_type = to_type
         buffer = TtypBuffer(
             ttyp=ttyp,
@@ -67,10 +67,16 @@ class TtypApp():
             on_text_insert=self._on_insert,
             on_cursor_position_changed=self._on_cursor_change
         )
+        self._debug_buffer = Buffer()
         lexer = TtypLexer(to_type=to_type)
         root_container = HSplit([
-            Window(BufferControl(buffer=buffer, lexer=lexer), wrap_lines=True)
+            Window(BufferControl(buffer=buffer, lexer=lexer), wrap_lines=True),
         ])
+        if debug:
+            root_container = HSplit([
+                Window(BufferControl(buffer=buffer, lexer=lexer), wrap_lines=True),
+                Window(BufferControl(buffer=self._debug_buffer), wrap_lines=True)
+            ])
         layout = Layout(root_container)
 
         style = Style.from_dict({
@@ -150,3 +156,6 @@ class TtypApp():
                     "correct": correct,
                     "mistakes": mistakes,
                 })
+
+    def _debug(self, text: str):
+        self._debug_buffer.text += text + " "
