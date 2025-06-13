@@ -45,7 +45,11 @@ class Ttyp():
             return
         typed_words = self._typed.split()
         in_final_word = len(typed_words) >= len(self._to_type.split())
-        final_word_ended = typed_words[-1] == self._to_type.split()[-1] or self._typed[-1] == " "
+
+        is_final_word_correct = typed_words[-1] == self._to_type.split()[-1]
+        is_space_in_final_word = self._typed[-1] == " "
+        final_word_ended = is_final_word_correct or is_space_in_final_word
+
         return in_final_word and final_word_ended
 
     def insert_char(self):
