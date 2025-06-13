@@ -54,11 +54,17 @@ class Ttyp():
         last_inserted_char = self._typed[self._cursor_position-1]
         typed_words = self._typed.split()
         if (last_inserted_char == " "):
-            if self._to_type[self._cursor_position-1] == " ":
+            correctly_typed = self._to_type[self._cursor_position-1] == " "
+            if correctly_typed:
                 return
-            if len(self._typed) >= 2 and self._to_type[self._cursor_position-2] == " ":
+
+            start_of_word = len(self._typed) >= 2 and self._to_type[self._cursor_position-2] == " "
+            if start_of_word:
+                # keep cursor in place
                 self._cursor_position -= 1
                 return
+
+            # go to next word
             typed_wcount = len(self._typed.split())
             to_type_wcount = 0
             next_space_pos = 0
