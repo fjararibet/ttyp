@@ -11,6 +11,10 @@ Start a typing test with default settings (English, 25 words):
 ```
 ttyp 
 ```
+Show help:
+```
+ttyp --help
+```
 Run a test in Spanish with 50 words:
 ```
 ttyp --language spanish --count 50
