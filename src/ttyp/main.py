@@ -41,7 +41,7 @@ def main():
         print(f"mistakes {mistakes}", file=sys.stderr)
         print(f"correct {correct}", file=sys.stderr)
     if result and args.quote and verbosity_level >= 1:
-        print(f"source {source}", file=sys.stderr)
+        print(f'source "{source}"', file=sys.stderr)
 
 
 if __name__ == '__main__':
