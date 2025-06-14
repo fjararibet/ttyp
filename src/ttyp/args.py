@@ -1,9 +1,16 @@
 import argparse
-from .content import get_available_languages
+from .content import get_available_languages, get_available_quote_languages
 
 
 def valid_language(language):
     if language not in get_available_languages():
+        raise argparse.ArgumentTypeError(
+            f"invalid choice: {language!r} (use -L to see valid languages)")
+    return language
+
+
+def valid_quote_language(language):
+    if language not in get_available_quote_languages():
         raise argparse.ArgumentTypeError(
             f"invalid choice: {language!r} (use -L to see valid languages)")
     return language
@@ -19,6 +26,12 @@ def get_args():
         help="Language"
     )
     parser.add_argument("-c", "--count", type=int, default=25, help="Word count to be typed")
+    parser.add_argument(
+        "-Q",
+        "--quote",
+        type=valid_quote_language,
+        help="Type a quote in the indicated language"
+    )
     parser.add_argument("-L", "--list-languages", action="store_true",
                         help="List available languages")
     parser.add_argument("-q", "--quiet", action="count", default=0,
