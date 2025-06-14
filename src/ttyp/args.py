@@ -18,6 +18,7 @@ def valid_quote_language(language):
 
 def get_args():
     parser = argparse.ArgumentParser(description="CLI typing test")
+    parser.add_argument("filepath", nargs="?", help="File to type")
     parser.add_argument(
         "-l",
         "--language",

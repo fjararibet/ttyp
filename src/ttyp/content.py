@@ -2,6 +2,7 @@ import importlib.resources
 from pathlib import Path
 import json
 from random import randint, random, choice
+import sys
 
 
 def _has_capital(s: str):
@@ -60,3 +61,12 @@ def get_available_quote_languages():
             for entry in data_dir.iterdir()
             if entry.name != "__init__.py"
         ]
+
+
+def get_file_content(filename: str):
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            return f.read().replace("\n", " "), None
+    except OSError as e:
+        print(f"Could not read file '{filename}': {e}")
+        sys.exit(1)

@@ -2,7 +2,13 @@ from prompt_toolkit import print_formatted_text as print
 import sys
 from .args import get_args
 from .ttyp import Ttyp
-from .content import random_words, get_available_languages, random_quote, get_available_quote_languages
+from .content import (
+    random_words,
+    get_available_languages,
+    random_quote,
+    get_available_quote_languages,
+    get_file_content,
+)
 from .app import TtypApp
 
 
@@ -18,8 +24,9 @@ def main():
         return
     verbosity_level = args.verbose - args.quiet
     to_type, source = (
-        random_words(args.language, args.count, args.punctuation) if not args.quote
-        else random_quote(args.quote)
+        random_quote(args.quote) if args.quote
+        else get_file_content(args.filepath) if args.filepath
+        else random_words(args.language, args.count, args.punctuation)
     )
     ttyp = Ttyp(to_type=to_type)
     app = TtypApp(
