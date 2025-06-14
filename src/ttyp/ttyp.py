@@ -35,14 +35,6 @@ class Ttyp():
     def _on_backspace(self):
         if not self._typed or not self._cursor_position:
             return
-        is_prev_word_right = (
-            self._typed.split()[-1] == self._to_type.split()[len(self._typed.split())-1]
-        )
-        if is_prev_word_right:
-            self._typed += " "
-            self._cursor_position = len(self._typed) + 1
-            return
-
         is_one_space = self._typed[self._cursor_position-2] == " "
         if is_one_space:
             self._typed = self._typed.rstrip()
