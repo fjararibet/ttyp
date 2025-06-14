@@ -27,7 +27,7 @@ class TtypLexer(Lexer):
                 min_len = min(len(typed_word), len(word_to_type))
                 for i, j in zip(typed_word, word_to_type):
                     style = "typed" if i == j else "wrong"
-                    tokens.append((f"class:{style}", i))
+                    tokens.append((f"class:{style}", j))
 
                 # leftover typed word
                 for c in typed_word[min_len:]:
