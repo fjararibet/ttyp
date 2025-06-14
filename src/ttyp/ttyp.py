@@ -13,9 +13,10 @@ class Ttyp():
 
     def set_typed(self, typed: str):
         backspace = len(typed) == len(self._typed) - 1
+        first_char_deleted = len(typed.split()) == len(self._typed.split()) - 1
         self._typed = typed
         if backspace:
-            self._on_backspace()
+            self._on_backspace(first_char_deleted)
 
     def set_cursor_position(self, cursor_position: int):
         self._cursor_position = cursor_position
@@ -32,7 +33,9 @@ class Ttyp():
     def get_correct(self):
         return self._number_of_correct_chars()
 
-    def _on_backspace(self):
+    def _on_backspace(self, first_char_deleted: bool):
+        if first_char_deleted:
+            return
         self._typed = self._typed.rstrip()
         self._cursor_position = len(self._typed)
 
