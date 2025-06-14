@@ -1,17 +1,33 @@
 import importlib.resources
 from pathlib import Path
 import json
-from random import randint
+from random import randint, random, choice
 
 
-def random_words(language: str, word_count: int):
+def _has_capital(s: str):
+    return any(c.isupper() for c in s)
+
+
+punctuation_marks = [".", ",", ":", ";", "!", "?",]
+
+
+def random_words(language: str, word_count: int, punctuation: bool):
     package = "ttyp.static.languages"
     with importlib.resources.open_text(package, f'{language}.json') as f:
         data = json.load(f)
-        chosen_word_list = [
-            data["words"][randint(0, len(data["words"])-1)]
-            for _ in range(word_count)
-        ]
+        words = data["words"]
+        if not punctuation:
+            words = [word for word in words if not _has_capital(word)]
+        chosen_word_list = [choice(words) for _ in range(word_count)]
+        if punctuation:
+            chosen_word_list = [
+                word + (choice(punctuation_marks) if random() < 0.2 else "")
+                for word in chosen_word_list
+            ]
+            chosen_word_list = [
+                word.capitalize() if random() < 0.25 else word
+                for word in chosen_word_list
+            ]
         return " ".join(chosen_word_list), None
 
 
@@ -20,7 +36,7 @@ def random_quote(language: str):
     with importlib.resources.open_text(package, f'{language}.json') as f:
         data = json.load(f)
         quotes = data["quotes"]
-        chosen_quote_info = quotes[randint(0, len(quotes)-1)]
+        chosen_quote_info = choice(quotes)
         chosen_quote = chosen_quote_info["text"]
         source = chosen_quote_info["source"]
         return chosen_quote, source

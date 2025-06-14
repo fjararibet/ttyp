@@ -34,6 +34,7 @@ def get_args():
     )
     parser.add_argument("-L", "--list-languages", action="store_true",
                         help="List available languages")
+    parser.add_argument("-p", "--punctuation", action="store_true", help="Enable punctuation")
     parser.add_argument("-q", "--quiet", action="count", default=0,
                         help="Decrease output, can be used multiple times")
     parser.add_argument("-v", "--verbose", action="count", default=1,

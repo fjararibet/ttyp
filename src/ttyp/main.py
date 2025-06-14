@@ -13,7 +13,7 @@ def main():
         return
     verbosity_level = args.verbose - args.quiet
     to_type, source = (
-        random_words(args.language, args.count) if not args.quote
+        random_words(args.language, args.count, args.punctuation) if not args.quote
         else random_quote(args.quote)
     )
     ttyp = Ttyp(to_type=to_type)
