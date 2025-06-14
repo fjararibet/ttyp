@@ -1,7 +1,7 @@
 from prompt_toolkit import print_formatted_text as print
 from .args import get_args
 from .ttyp import Ttyp
-from .content import random_words, get_available_languages, random_quote
+from .content import random_words, get_available_languages, random_quote, get_available_quote_languages
 from .app import TtypApp
 
 
@@ -9,6 +9,10 @@ def main():
     args = get_args()
     if args.list_languages:
         languages = get_available_languages()
+        print("\n".join(languages))
+        return
+    if args.list_quote_languages:
+        languages = get_available_quote_languages()
         print("\n".join(languages))
         return
     verbosity_level = args.verbose - args.quiet
