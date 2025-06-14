@@ -1,4 +1,5 @@
 from prompt_toolkit import print_formatted_text as print
+import sys
 from .args import get_args
 from .ttyp import Ttyp
 from .content import random_words, get_available_languages, random_quote, get_available_quote_languages
@@ -31,16 +32,16 @@ def main():
     if result and verbosity_level >= 0:
         wpm = result.get("wpm")
         acc = result.get("acc")
-        print(f"wpm {wpm:.1f}")
-        print(f"acc {acc*100:.1f}%")
+        print(f"wpm {wpm:.1f}", file=sys.stderr)
+        print(f"acc {acc*100:.1f}%", file=sys.stderr)
 
     if result and verbosity_level >= 2:
         correct = result.get("correct")
         mistakes = result.get("mistakes")
-        print(f"mistakes {mistakes}")
-        print(f"correct {correct}")
+        print(f"mistakes {mistakes}", file=sys.stderr)
+        print(f"correct {correct}", file=sys.stderr)
     if result and args.quote and verbosity_level >= 1:
-        print(f"source {source}")
+        print(f"source {source}", file=sys.stderr)
 
 
 if __name__ == '__main__':
