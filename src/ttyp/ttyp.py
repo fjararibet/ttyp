@@ -33,6 +33,9 @@ class Ttyp():
         return self._number_of_correct_chars()
 
     def _on_backspace(self):
+        # ERROR: when space is typed before the last letter of a word
+        # and then the next letter of the word is written, doing backspace
+        # will go back two spaces
         if not self._typed or not self._cursor_position:
             return
         is_one_space = self._typed[self._cursor_position-2] == " "
