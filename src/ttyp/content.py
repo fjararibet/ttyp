@@ -1,7 +1,7 @@
 import importlib.resources
 from pathlib import Path
 import json
-from random import randint, random, choice
+from random import random, choice
 import sys
 
 
@@ -33,6 +33,9 @@ def random_words(language: str, word_count: int, punctuation: bool):
 
 
 def random_quote(language: str):
+    if language not in get_available_quote_languages():
+        print("Language not supported for quotes, use --list-quote-languages to see available quote languages")
+        sys.exit(1)
     package = "ttyp.static.quotes"
     with importlib.resources.open_text(package, f'{language}.json') as f:
         data = json.load(f)

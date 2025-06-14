@@ -30,8 +30,8 @@ def get_args():
     parser.add_argument(
         "-Q",
         "--quote",
-        type=valid_quote_language,
-        help="Type a quote in the indicated language"
+        action="store_true",
+        help="Type a quote"
     )
     parser.add_argument("-L", "--list-languages", action="store_true",
                         help="List available languages")

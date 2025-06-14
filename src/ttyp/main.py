@@ -24,7 +24,7 @@ def main():
         return
     verbosity_level = args.verbose - args.quiet
     to_type, source = (
-        random_quote(args.quote) if args.quote
+        random_quote(args.language) if args.quote
         else get_file_content(args.filepath) if args.filepath
         else random_words(args.language, args.count, args.punctuation)
     )
