@@ -52,7 +52,7 @@ def get_available_languages():
         return [
             Path(entry.name).stem
             for entry in data_dir.iterdir()
-            if entry.name != "__init__.py"
+            if entry.name not in  ["__init__.py", "__pycache__"]
         ]
 
 
@@ -62,7 +62,7 @@ def get_available_quote_languages():
         return [
             Path(entry.name).stem
             for entry in data_dir.iterdir()
-            if entry.name != "__init__.py"
+            if entry.name not in  ["__init__.py", "__pycache__"]
         ]
 
 
