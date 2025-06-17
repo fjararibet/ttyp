@@ -41,6 +41,7 @@ class TtypLexer(Lexer):
                 # to account for extra letters the user might have typed
                 # in a word.
                 if wrapped_line:
+                    idx = 0
                     for typed_word, word_to_type in zip(wrapped_line.split(), wrapped_line_to_type.split()):
                         # char by char
                         min_len = min(len(typed_word), len(word_to_type))
@@ -59,14 +60,18 @@ class TtypLexer(Lexer):
                             tokens.append((f"class:{style}", c))
 
                         tokens.append(("", " "))
+                    # avoid extra space when in last word of line
+                    if len(wrapped_line.split()) == len(wrapped_line_to_type.split()):
+                        tokens.pop()
 
                 # words left to type
                 typed_wcount = len(wrapped_line.split()) if wrapped_line else 0
-                for word in wrapped_line_to_type.split()[typed_wcount:-1]:
+                for word in wrapped_line_to_type.split()[typed_wcount:]:
                     tokens.append(("class:ghost", word))
                     tokens.append(("", " "))
-                # if typed_wcount >= len(wrapped_line_to_type.split()):
-                tokens.append(("class:ghost", wrapped_line_to_type.split()[-1]))
+                if typed_wcount < len(wrapped_line_to_type.split()):
+                    tokens.pop()
+                    # tokens.append(("class:ghost", wrapped_line_to_type.split()[-1]))
                 tokens.append(("", " " * (self.width - len(wrapped_line_to_type))))
 
             return tokens
