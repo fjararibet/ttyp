@@ -8,6 +8,7 @@ from prompt_toolkit.styles import Style
 from prompt_toolkit.document import Document
 from prompt_toolkit.application.current import get_app_or_none
 import textwrap
+from itertools import zip_longest
 from .ttyp import Ttyp
 
 
@@ -29,33 +30,37 @@ class TtypLexer(Lexer):
                 return []
             line = document.lines[lineno]
             tokens = []
-            # here it needs to be word by word instead of char by char
-            # to account for extra letters the user might have typed
-            # in a word.
-            for typed_word, word_to_type in zip(line.split(), self.to_type.split()):
-                # char by char
-                min_len = min(len(typed_word), len(word_to_type))
-                for i, j in zip(typed_word, word_to_type):
-                    style = "typed" if i == j else "wrong"
-                    tokens.append((f"class:{style}", j))
+            wrapped_to_type = textwrap.wrap(self.to_type, width=self.width)
+            wrapped_lines = textwrap.wrap(self.to_type, width=self.width)
+            for wrapped_line, wrapped_line_to_type in zip(wrapped_lines, wrapped_to_type):
+                # here it needs to be word by word instead of char by char
+                # to account for extra letters the user might have typed
+                # in a word.
+                for typed_word, word_to_type in zip(wrapped_line.split(), wrapped_line_to_type.split()):
+                    # char by char
+                    min_len = min(len(typed_word), len(word_to_type))
+                    for i, j in zip(typed_word, word_to_type):
+                        style = "typed" if i == j else "wrong"
+                        tokens.append((f"class:{style}", j))
 
-                # leftover typed word
-                for c in typed_word[min_len:]:
-                    style = "wrong"
-                    tokens.append((f"class:{style}", c))
+                    # leftover typed word
+                    for c in typed_word[min_len:]:
+                        style = "wrong"
+                        tokens.append((f"class:{style}", c))
 
-                # leftover target word
-                for c in word_to_type[min_len:]:
-                    style = "ghost"
-                    tokens.append((f"class:{style}", c))
+                    # leftover target word
+                    for c in word_to_type[min_len:]:
+                        style = "ghost"
+                        tokens.append((f"class:{style}", c))
 
-                tokens.append(("", " "))
+                    tokens.append(("", " "))
 
-            # words left to type
-            typed_wcount = len(line.split())
-            for i, word in enumerate(self.to_type.split()[typed_wcount:]):
-                tokens.append(("class:ghost", word))
-                tokens.append(("", " "))
+                # words left to type
+                typed_wcount = len(wrapped_line)
+                for i, word in enumerate(wrapped_line_to_type.split()[typed_wcount:]):
+                    tokens.append(("class:ghost", word))
+                    tokens.append(("", " "))
+                tokens.append(("", " " * (self.width - len(wrapped_line_to_type)-1)))
 
             return tokens
 
