@@ -31,6 +31,10 @@ class TtypLexer(Lexer):
             line = document.lines[lineno]
             tokens = []
             wrapped_to_type = textwrap.wrap(self.to_type, width=self.width)
+            # for i in range(len(wrapped_to_type)-1):
+            #     if wrapped_to_type[i][-1] != " ":
+            #         wrapped_to_type[i+1] = wrapped_to_type.split()[-1] + " " + wrapped_to_type[i+1]
+            #         wrapped_to_type[i] = wrapped_to_type[:-1]
             wrapped_lines = textwrap.wrap(line, width=self.width)
             for wrapped_line, wrapped_line_to_type in zip_longest(wrapped_lines, wrapped_to_type):
                 # here it needs to be word by word instead of char by char
@@ -58,10 +62,12 @@ class TtypLexer(Lexer):
 
                 # words left to type
                 typed_wcount = len(wrapped_line.split()) if wrapped_line else 0
-                for word in wrapped_line_to_type.split()[typed_wcount:]:
+                for word in wrapped_line_to_type.split()[typed_wcount:-1]:
                     tokens.append(("class:ghost", word))
                     tokens.append(("", " "))
-                tokens.append(("", " " * (self.width - len(wrapped_line_to_type)-1)))
+                # if typed_wcount >= len(wrapped_line_to_type.split()):
+                tokens.append(("class:ghost", wrapped_line_to_type.split()[-1]))
+                tokens.append(("", " " * (self.width - len(wrapped_line_to_type))))
 
             return tokens
 
