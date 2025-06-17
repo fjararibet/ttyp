@@ -6,6 +6,8 @@ from prompt_toolkit.layout.controls import BufferControl
 from prompt_toolkit.lexers import Lexer
 from prompt_toolkit.styles import Style
 from prompt_toolkit.document import Document
+from prompt_toolkit.application.current import get_app_or_none
+import textwrap
 from .ttyp import Ttyp
 
 
@@ -13,10 +15,18 @@ class TtypLexer(Lexer):
     def __init__(self, to_type, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.to_type = to_type
+        self.width = None
 
     def lex_document(self, document: Document):
 
         def get_line(lineno):
+            app = get_app_or_none()
+            if app:
+                window = app.layout.current_window
+                if window and window.render_info:
+                    self.width = window.render_info.window_width
+            if not self.width:
+                return []
             line = document.lines[lineno]
             tokens = []
             # here it needs to be word by word instead of char by char
