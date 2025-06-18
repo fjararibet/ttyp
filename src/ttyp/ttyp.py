@@ -1,4 +1,5 @@
 import time
+import textwrap
 
 
 class Ttyp():
@@ -10,7 +11,8 @@ class Ttyp():
         self._mistakes: int = 0
         self._start = None
         self._cursor_position: int = 0
-        self._width = None
+        self._width: int = None
+        self._wrapped_typed: [str] = ""
 
     def set_typed(self, typed: str):
         backspace = len(typed) == len(self._typed) - 1
@@ -58,6 +60,8 @@ class Ttyp():
     def insert_char(self):
         if not self._start:
             self._start = time.time()
+        wrapped_to_type = textwrap.wrap(self._to_type, width=self._width)
+        wrapped_typed = textwrap.wrap(self._typed, width=self._width)
         last_inserted_char = self._typed[self._cursor_position-1]
         typed_words = self._typed.split()
         if (last_inserted_char == " "):
@@ -70,6 +74,8 @@ class Ttyp():
                 # keep cursor in place
                 self._cursor_position -= 1
                 return
+
+
 
             correctly_typed = len(typed_words[-1]) == len(self._to_type.split()[len(typed_words)-1])
             if correctly_typed:
