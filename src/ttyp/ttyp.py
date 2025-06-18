@@ -10,6 +10,7 @@ class Ttyp():
         self._mistakes: int = 0
         self._start = None
         self._cursor_position: int = 0
+        self._width = None
 
     def set_typed(self, typed: str):
         backspace = len(typed) == len(self._typed) - 1
@@ -20,6 +21,9 @@ class Ttyp():
 
     def set_cursor_position(self, cursor_position: int):
         self._cursor_position = cursor_position
+
+    def set_width(self, width: int):
+        self._width = width
 
     def get_cursor_position(self):
         return self._cursor_position

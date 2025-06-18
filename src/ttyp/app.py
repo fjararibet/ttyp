@@ -21,27 +21,20 @@ class TtypLexer(Lexer):
     def lex_document(self, document: Document):
 
         def get_line(lineno):
-            app = get_app_or_none()
+            app: Application = get_app_or_none()
             if app:
-                window = app.layout.current_window
-                if window and window.render_info:
-                    self.width = window.render_info.window_width
+                self.width = app.output.get_size().columns
             if not self.width:
                 return []
             line = document.lines[lineno]
             tokens = []
             wrapped_to_type = textwrap.wrap(self.to_type, width=self.width)
-            # for i in range(len(wrapped_to_type)-1):
-            #     if wrapped_to_type[i][-1] != " ":
-            #         wrapped_to_type[i+1] = wrapped_to_type.split()[-1] + " " + wrapped_to_type[i+1]
-            #         wrapped_to_type[i] = wrapped_to_type[:-1]
             wrapped_lines = textwrap.wrap(line, width=self.width)
             for wrapped_line, wrapped_line_to_type in zip_longest(wrapped_lines, wrapped_to_type):
                 # here it needs to be word by word instead of char by char
                 # to account for extra letters the user might have typed
                 # in a word.
                 if wrapped_line:
-                    idx = 0
                     for typed_word, word_to_type in zip(wrapped_line.split(), wrapped_line_to_type.split()):
                         # char by char
                         min_len = min(len(typed_word), len(word_to_type))
@@ -117,10 +110,16 @@ class TtypApp():
             full_screen=False,
             style=style,
             erase_when_done=erase_when_done,
+            after_render=self._after_render
         )
 
     def run(self):
         return self._app.run()
+
+    def _after_render(self, app: Application):
+        ttyp: Ttyp = app.current_buffer.ttyp
+        width = app.output.get_size().columns
+        ttyp.set_width(width)
 
     def _create_keybindins(self):
         kb = KeyBindings()
