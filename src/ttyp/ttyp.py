@@ -20,6 +20,13 @@ class Ttyp():
         self._typed = typed
         if backspace:
             self._on_backspace(first_char_deleted)
+        if self._width:
+            wrapped = textwrap.wrap(self._typed, width=self._width)
+            self._typed = ""
+            for line in wrapped:
+                self._typed += line
+                self._typed += " " * (self._width - len(line))
+            self._cursor_position = len(self._typed)
 
     def set_cursor_position(self, cursor_position: int):
         self._cursor_position = cursor_position
@@ -74,8 +81,6 @@ class Ttyp():
                 # keep cursor in place
                 self._cursor_position -= 1
                 return
-
-
 
             correctly_typed = len(typed_words[-1]) == len(self._to_type.split()[len(typed_words)-1])
             if correctly_typed:
