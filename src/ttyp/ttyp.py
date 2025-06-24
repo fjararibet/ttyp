@@ -20,19 +20,18 @@ class Ttyp():
         self._typed = typed
         if backspace:
             self._on_backspace(first_char_deleted)
-        if self._width:
-            wrapped = textwrap.wrap(self._typed, width=self._width)
-            self._typed = ""
-            for line in wrapped:
-                self._typed += line
-                self._typed += " " * (self._width - len(line))
-            self._cursor_position = len(self._typed)
 
     def set_cursor_position(self, cursor_position: int):
         self._cursor_position = cursor_position
 
     def set_width(self, width: int):
         self._width = width
+        wrapped = textwrap.wrap(self._to_type, width=self._width)
+        self._to_type = ""
+        for line in wrapped:
+            self._to_type += line
+            self._to_type += " " * (self._width - len(line))
+        self._to_type[-1].rstrip()
 
     def get_cursor_position(self):
         return self._cursor_position
