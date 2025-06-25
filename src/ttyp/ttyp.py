@@ -77,12 +77,13 @@ class Ttyp():
             if correctly_typed:
                 wrapped_typed = ttyp_textwrap(self._typed, width=self._width)
                 wrapped_to_type = ttyp_textwrap(self._to_type, width=self._width)
-                if len(wrapped_typed[-1].split()) == len(wrapped_to_type[len(wrapped_typed)-1].split()):
+                is_last_word_of_line = len(
+                    wrapped_typed[-1].split()) == len(wrapped_to_type[len(wrapped_typed)-1].split())
+                if is_last_word_of_line:
                     self._typed = self._typed.rstrip()
                     self._typed += " "*(self._width - len(wrapped_typed[-1]))
                     self._cursor_position = len(self._typed)
                 return
-
             # go to next word
             typed_wcount = len(self._typed.split())
             to_type_wcount = 0

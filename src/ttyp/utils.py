@@ -17,5 +17,6 @@ def ttyp_textwrap(text: str, width: int):
             last_word = result[-1].split()[-1]
             result[-1] = " ".join(result[-1].split()[:-1])
             new_line_words.append(last_word)
-        result.append(" ".join(new_line_words))
+        if new_line_words:
+            result.append(" ".join(new_line_words))
     return result
