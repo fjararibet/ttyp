@@ -7,7 +7,6 @@ from prompt_toolkit.lexers import Lexer
 from prompt_toolkit.styles import Style
 from prompt_toolkit.document import Document
 from prompt_toolkit.application.current import get_app_or_none
-import textwrap
 from itertools import zip_longest
 from .ttyp import Ttyp
 from .utils import ttyp_textwrap
@@ -161,6 +160,7 @@ class TtypApp():
         cursor_position = buffer.cursor_position
         ttyp.insert_char()
         new_cursor_position = ttyp.get_cursor_position()
+        buffer.text = ttyp.get_typed()
 
         # cursor can't be moved if the buffer is not big enough,
         # so spaces are added

@@ -105,18 +105,18 @@ class Ttyp():
             return
         curr_target_word = self._to_type.split()[len(typed_words)-1]
         if (len(last_typed_word) > len(curr_target_word)):
-            wrapped_typed = ttyp_textwrap(self._typed, width=self._width)
-            wrapped_to_type = ttyp_textwrap(self._to_type, width=self._width)
-            typed_char_len = len(" ".join(wrapped_typed[-1]))
-            to_type_equivalent = len(
-                " ".join(wrapped_to_type[len(wrapped_typed)-1].split()[:len(wrapped_typed[-1])])
-            )
-            extra_chars_allowed = self._width - len(wrapped_to_type[len(wrapped_typed)-1])
-            extra_wrong_chars = to_type_equivalent - typed_char_len
-            if extra_wrong_chars > extra_chars_allowed:
-                self._to_type = self._to_type[:-1]
-                self._cursor_position = len(self._to_type)
-            self._mistakes += 1
+            # wrapped_typed = ttyp_textwrap(self._typed, width=self._width)
+            # wrapped_to_type = ttyp_textwrap(self._to_type, width=self._width)
+            # typed_char_len = len(" ".join(wrapped_typed[-1]))
+            # to_type_equivalent = len(
+            #     " ".join(wrapped_to_type[len(wrapped_typed)-1].split()[:len(wrapped_typed[-1])])
+            # )
+            # extra_chars_allowed = self._width - len(wrapped_to_type[len(wrapped_typed)-1])
+            # extra_wrong_chars = to_type_equivalent - typed_char_len
+            # if extra_wrong_chars > extra_chars_allowed:
+            self._typed = self._typed[:-1]
+            self._cursor_position = len(self._typed)
+            # self._mistakes += 1
             return
 
         if (last_inserted_char != curr_target_word[len(last_typed_word)-1]):
