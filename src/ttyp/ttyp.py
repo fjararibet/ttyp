@@ -1,5 +1,5 @@
 import time
-import textwrap
+from .utils import ttyp_textwrap
 
 
 class Ttyp():
@@ -26,12 +26,6 @@ class Ttyp():
 
     def set_width(self, width: int):
         self._width = width
-        # wrapped = textwrap.wrap(self._to_type, width=self._width)
-        # self._to_type = ""
-        # for line in wrapped:
-        #     self._to_type += line
-        #     self._to_type += " " * (self._width - len(line))
-        # self._to_type[-1].rstrip()
 
     def get_cursor_position(self):
         return self._cursor_position
@@ -81,8 +75,8 @@ class Ttyp():
 
             correctly_typed = len(typed_words[-1]) == len(self._to_type.split()[len(typed_words)-1])
             if correctly_typed:
-                wrapped_typed = textwrap.wrap(self._typed, width=self._width)
-                wrapped_to_type = textwrap.wrap(self._to_type, width=self._width)
+                wrapped_typed = ttyp_textwrap(self._typed, width=self._width)
+                wrapped_to_type = ttyp_textwrap(self._to_type, width=self._width)
                 if len(wrapped_typed[-1].split()) == len(wrapped_to_type[len(wrapped_typed)-1].split()):
                     self._typed = self._typed.rstrip()
                     self._typed += " "*(self._width - len(wrapped_typed[-1]))

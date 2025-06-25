@@ -10,6 +10,7 @@ from prompt_toolkit.application.current import get_app_or_none
 import textwrap
 from itertools import zip_longest
 from .ttyp import Ttyp
+from .utils import ttyp_textwrap
 
 
 class TtypLexer(Lexer):
@@ -28,8 +29,8 @@ class TtypLexer(Lexer):
                 return []
             line = document.lines[lineno]
             tokens = []
-            wrapped_to_type = textwrap.wrap(self.to_type, width=self.width)
-            wrapped_lines = textwrap.wrap(line, width=self.width)
+            wrapped_to_type = ttyp_textwrap(self.to_type, width=self.width)
+            wrapped_lines = ttyp_textwrap(line, width=self.width)
             for wrapped_line, wrapped_line_to_type in zip_longest(wrapped_lines, wrapped_to_type):
                 # here it needs to be word by word instead of char by char
                 # to account for extra letters the user might have typed
