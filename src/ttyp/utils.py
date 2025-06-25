@@ -11,9 +11,11 @@ def ttyp_textwrap(text: str, width: int):
             result[i+1] = " ".join([last_word] + result[i+1].split())
         i += 1
 
-    # if result:
-    #     if len(result[-1]) >= width-1:
-    #         last_word = result[-1].split()[-1]
-    #         result[-1] = " ".join(result[-1].split()[:-1])
-    #         result.append(last_word)
+    if result:
+        new_line_words = []
+        while len(result[-1]) >= width:
+            last_word = result[-1].split()[-1]
+            result[-1] = " ".join(result[-1].split()[:-1])
+            new_line_words.append(last_word)
+        result.append(" ".join(new_line_words))
     return result
