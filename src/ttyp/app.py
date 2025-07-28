@@ -157,15 +157,9 @@ class TtypApp():
 
     def _on_insert(self, buffer: TtypBuffer):
         ttyp = buffer.ttyp
-        cursor_position = buffer.cursor_position
         ttyp.insert_char()
         new_cursor_position = ttyp.get_cursor_position()
         buffer.text = ttyp.get_typed()
-
-        # cursor can't be moved if the buffer is not big enough,
-        # so spaces are added
-        diff = new_cursor_position - cursor_position
-        buffer.text += " " * diff
 
         # reset becasuse on_change was triggered with old value
         ttyp.set_cursor_position(new_cursor_position)

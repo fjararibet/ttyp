@@ -88,15 +88,17 @@ class Ttyp():
             typed_wcount = len(self._typed.split())
             to_type_wcount = 0
             next_space_pos = 0
-            for c in self._to_type:
+            for i, c in enumerate(self._to_type):
                 if to_type_wcount >= typed_wcount:
                     break
                 next_space_pos += 1
                 if c == " ":
                     to_type_wcount += 1
             if next_space_pos > self._cursor_position-1:
-                self._mistakes += next_space_pos - self._cursor_position
-                self._cursor_position = next_space_pos
+                diff = next_space_pos - self._cursor_position
+                self._mistakes += diff
+                self._typed += " "*diff
+                self._cursor_position = len(self._typed)
             return
         if len(typed_words) == 0:
             return
