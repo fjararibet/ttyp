@@ -59,11 +59,10 @@ class TtypBuffer(Buffer):
 
 
 class TtypApp():
-    def __init__(self, ttyp: Ttyp, to_type: [str], erase_when_done: bool, debug: bool = False):
+    def __init__(self, ttyp: Ttyp, to_type: list[str], erase_when_done: bool, debug: bool = False):
         self._to_type = to_type
         buffer = TtypBuffer(
             ttyp=ttyp,
-            on_text_changed=self._on_change,
             on_text_insert=self._on_insert,
             on_cursor_position_changed=self._on_cursor_change
         )
@@ -109,45 +108,33 @@ class TtypApp():
 
         return kb
 
-    # the following functions are defined in the order they
-    # are ran on text insert
-
-    def _on_change(self, buffer: TtypBuffer):
-        ttyp = buffer.ttyp
-
-        ttyp.set_cursor_position(buffer.cursor_position)
-        ttyp.set_typed(buffer.text)
-        # set_typed has side effects so the state
-        # has to be updated
-        new_cursor_position = ttyp.get_cursor_position()
-        buffer.text = ttyp.get_typed()
-        buffer.cursor_position = new_cursor_position
-
     def _on_cursor_change(self, buffer: TtypBuffer):
-        ttyp = buffer.ttyp
-        target = ttyp.get_cursor_position()
-        if buffer.cursor_position != target:
-            buffer.cursor_position = target
+        end = len(buffer.text)
+        if buffer.cursor_position < end:
+            buffer.cursor_position = end
 
     def _on_insert(self, buffer: TtypBuffer):
-        ttyp = buffer.ttyp
-        cursor_position = buffer.cursor_position
-        ttyp.insert_char()
-        new_cursor_position = ttyp.get_cursor_position()
+        ttyp: Ttyp = buffer.ttyp
+        new_cursor_position = ttyp.insert_char(
+            typed=buffer.text,
+            last_char=buffer.document.char_before_cursor,
+            cursor_position=buffer.cursor_position,
+        )
+        # In case a space key is blocked
+        if new_cursor_position == buffer.cursor_position - 1:
+            buffer.text = buffer.text[:-1]
 
-        # cursor can't be moved if the buffer is not big enough,
-        # so spaces are added
-        diff = new_cursor_position - cursor_position
+        # # cursor can't be moved ahead if the buffer is not big enough,
+        # # so spaces are added
+        diff = new_cursor_position - buffer.cursor_position
         buffer.text += " " * diff
 
-        # reset becasuse on_change was triggered with old value
-        ttyp.set_cursor_position(new_cursor_position)
         buffer.cursor_position = new_cursor_position
 
-        if ttyp.is_done():
-            wpm = ttyp.get_wpm()
-            acc = ttyp.get_acc()
-            correct = ttyp.get_correct()
+        if ttyp.is_done(buffer.text, buffer.cursor_position):
+            wpm = ttyp.get_wpm(buffer.text)
+            acc = ttyp.get_acc(buffer.text)
+            correct = ttyp.get_correct(buffer.text)
             mistakes = ttyp.get_mistakes()
             self._app.exit(
                 result={
@@ -157,5 +144,5 @@ class TtypApp():
                     "mistakes": mistakes,
                 })
 
-    def _debug(self, text: str):
+    def _debug(self, text):
         self._debug_buffer.text += str(text) + " "
