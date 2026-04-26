@@ -12,7 +12,7 @@ def _has_capital(s: str):
 punctuation_marks = [".", ",", ":", ";", "!", "?",]
 
 
-def random_words(language: str, word_count: int, punctuation: bool):
+def random_words(language: str, word_count: int, punctuation: bool) -> list[str]:
     package = "ttyp.static.languages"
     with importlib.resources.open_text(package, f'{language}.json') as f:
         data = json.load(f)
@@ -29,7 +29,7 @@ def random_words(language: str, word_count: int, punctuation: bool):
                 word.capitalize() if random() < 0.25 else word
                 for word in chosen_word_list
             ]
-        return " ".join(chosen_word_list), None
+        return chosen_word_list
 
 
 def random_quote(language: str):

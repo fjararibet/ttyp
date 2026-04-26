@@ -23,11 +23,12 @@ def main():
         print("\n".join(languages))
         return
     verbosity_level = args.verbose - args.quiet
-    to_type, source = (
-        random_quote(args.language) if args.quote
-        else get_file_content(args.filepath) if args.filepath
-        else random_words(args.language, args.count, args.punctuation)
-    )
+    # to_type, source = (
+    #     random_quote(args.language) if args.quote
+    #     else get_file_content(args.filepath) if args.filepath
+    #     else random_words(args.language, args.count, args.punctuation), None
+    # )
+    to_type, source = random_words(args.language, args.count, args.punctuation), None
     ttyp = Ttyp(to_type=to_type)
     app = TtypApp(
         to_type=to_type,
