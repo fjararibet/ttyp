@@ -17,57 +17,56 @@ class GhostBufferControl(BufferControl):
 
     def create_content(self, width, height, preview_search=False):
         real = super().create_content(width, height, preview_search)
-        typed = self.buffer.text
 
         wrapped = textwrap.wrap(
             " ".join(self.to_type),
-            width=width-1,
+            width=max(1, width - 1),
             break_long_words=False,
             break_on_hyphens=False,
         )
-        total = max(real.line_count, len(wrapped))
+
+        typed_lines = self.buffer.document.lines  # always at least [""]
+        total = max(len(typed_lines), len(wrapped))
+
+        def render_line(typed_line: str, target_line: str):
+            tokens = []
+            typed_words = typed_line.split(" ") if typed_line else []
+            target_words = target_line.split(" ")
+
+            for idx, target_word in enumerate(target_words):
+                if idx < len(typed_words):
+                    typed_word = typed_words[idx]
+                    # char-by-char comparison up to the shorter length
+                    n = min(len(typed_word), len(target_word))
+                    for i in range(n):
+                        style = "class:typed" if typed_word[i] == target_word[i] else "class:wrong"
+                        tokens.append((style, target_word[i]))
+                    # extra chars the user typed beyond the target word
+                    if len(typed_word) > n:
+                        tokens.append(("class:wrong", typed_word[n:]))
+                    # remaining chars of the target word still to type
+                    if len(target_word) > n:
+                        tokens.append(("class:ghost", target_word[n:]))
+                else:
+                    # whole word still to type
+                    tokens.append(("class:ghost", target_word))
+
+                # space between words (not after the last one)
+                if idx < len(target_words) - 1:
+                    tokens.append(("", " "))
+            return tokens
 
         def get_line(lineno):
-            if lineno >= len(self.buffer.document.lines):
+            typed_line = typed_lines[lineno] if lineno < len(typed_lines) else ""
+            target_line = wrapped[lineno] if lineno < len(wrapped) else ""
+
+            if not target_line:
+                # past the ghost — defer to whatever the real BufferControl produced
+                if lineno < real.line_count:
+                    return real.get_line(lineno)
                 return []
-            line = self.buffer.document.lines[lineno]
-            tokens = []
 
-            for line, to_type_line in zip(self.buffer.document.lines, wrapped):
-            
-                # here it needs to be word by word instead of char by char
-                # to account for extra letters the user might have typed
-                # in a word.
-                for typed_word, word_to_type in zip(line.split(), to_type_line.split()):
-                    # char by char
-                    min_len = min(len(typed_word), len(word_to_type))
-                    for i, j in zip(typed_word, word_to_type):
-                        style = "typed" if i == j else "wrong"
-                        tokens.append((f"class:{style}", j))
-
-                    # leftover typed word
-                    for c in typed_word[min_len:]:
-                        style = "wrong"
-                        tokens.append((f"class:{style}", c))
-
-                    # leftover target word
-                    for c in word_to_type[min_len:]:
-                        style = "ghost"
-                        tokens.append((f"class:{style}", c))
-
-                    tokens.append(("", " "))
-
-                # words left to type
-                typed_wcount = len(line.split())
-                leftover = to_type_line.split()[typed_wcount:]
-                for i, word in enumerate(leftover):
-                    tokens.append(("class:ghost", word))
-                    if i < len(leftover) - 1:
-                        tokens.append(("", " "))
-                        continue
-                    
-
-            return tokens
+            return render_line(typed_line, target_line)
 
         return UIContent(
             get_line=get_line,
@@ -75,66 +74,6 @@ class GhostBufferControl(BufferControl):
             cursor_position=real.cursor_position,
             show_cursor=real.show_cursor,
         )
-
-
-class TtypLexer(Lexer):
-    def __init__(self, to_type: list[str], *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.to_type = to_type
-
-    def lex_document(self, document: Document):
-
-        def get_line(lineno):
-            line = document.lines[lineno]
-            tokens = []
-
-            cols = get_app().output.get_size().columns
-            wrapped = textwrap.wrap(
-                " ".join(self.to_type),
-                width=cols-1,
-                break_long_words=False,
-                break_on_hyphens=False,
-                replace_whitespace=False,
-                drop_whitespace=True,
-            )
-            for line, to_type_line in zip(document.lines, wrapped):
-            
-                # here it needs to be word by word instead of char by char
-                # to account for extra letters the user might have typed
-                # in a word.
-                for typed_word, word_to_type in zip(line.split(), to_type_line.split()):
-                    # char by char
-                    min_len = min(len(typed_word), len(word_to_type))
-                    for i, j in zip(typed_word, word_to_type):
-                        style = "typed" if i == j else "wrong"
-                        tokens.append((f"class:{style}", j))
-
-                    # leftover typed word
-                    for c in typed_word[min_len:]:
-                        style = "wrong"
-                        tokens.append((f"class:{style}", c))
-
-                    # leftover target word
-                    for c in word_to_type[min_len:]:
-                        style = "ghost"
-                        tokens.append((f"class:{style}", c))
-
-                    tokens.append(("", " "))
-
-                # words left to type
-                typed_wcount = len(line.split())
-                leftover = to_type_line.split()[typed_wcount:]
-                for i, word in enumerate(leftover):
-                    print(word)
-                    tokens.append(("class:ghost", word))
-                    if i < len(leftover) - 1:
-                        tokens.append(("", " "))
-                        continue
-                    
-
-            return tokens
-
-        return get_line
 
 
 class TtypBuffer(Buffer):
@@ -152,13 +91,12 @@ class TtypApp():
             on_cursor_position_changed=self._on_cursor_change
         )
         self._debug_buffer = Buffer()
-        lexer = TtypLexer(to_type=to_type)
         root_container = HSplit([
-            Window(GhostBufferControl(to_type=to_type, buffer=buffer, lexer=None), wrap_lines=False),
+            Window(GhostBufferControl(to_type=to_type, buffer=buffer), wrap_lines=False),
         ])
         if debug:
             root_container = HSplit([
-                Window(BufferControl(buffer=buffer, lexer=lexer), wrap_lines=True),
+                Window(BufferControl(buffer=buffer), wrap_lines=True),
                 Window(BufferControl(buffer=self._debug_buffer), wrap_lines=True)
             ])
         layout = Layout(root_container)
