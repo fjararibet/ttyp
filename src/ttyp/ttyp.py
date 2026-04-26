@@ -32,39 +32,19 @@ class Ttyp():
             self._start = time.time()
         typed_words = typed.split()
         if (last_char == " "):
-            start_of_word = (
-                len(typed) >= 2
-                and typed[cursor_position-2] == " "
-            )
-            start_of_test = len(typed.strip()) == 0
-            if start_of_word or start_of_test:
-                # keep cursor in place
-                return cursor_position - 1
 
             correctly_typed = len(typed_words[-1]) == len(self._to_type.split()[len(typed_words)-1])
             if correctly_typed:
                 return cursor_position
-
-            # go to next word
-            typed_wcount = len(typed.split())
-            to_type_wcount = 0
-            next_space_pos = 0
-            for c in self._to_type:
-                if to_type_wcount >= typed_wcount:
-                    break
-                next_space_pos += 1
-                if c == " ":
-                    to_type_wcount += 1
-            if next_space_pos > cursor_position-1:
-                self._mistakes += next_space_pos - cursor_position
-                cursor_position = next_space_pos
-            return cursor_position
+            return cursor_position - 1
 
         if len(typed_words) == 0:
             return cursor_position
+
         last_typed_word = typed_words[-1]
         if (len(typed_words) > len(self._to_type.split())):
             return cursor_position
+
         curr_target_word = self._to_type.split()[len(typed_words)-1]
         if (len(last_typed_word) > len(curr_target_word)):
             self._mistakes += 1
