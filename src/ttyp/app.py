@@ -55,7 +55,7 @@ class TtypBufferControl(BufferControl):
                     tokens.append(("class:ghost", target_word))
 
                 # space between words (not after the last one)
-                if idx < len(target_words) - 1:
+                if idx < len(target_words):
                     tokens.append(("", " "))
             return tokens
 
@@ -95,11 +95,11 @@ class TtypApp():
         )
         self._debug_buffer = Buffer()
         root_container = HSplit([
-            Window(TtypBufferControl(to_type=to_type, buffer=buffer), wrap_lines=False),
+            Window(TtypBufferControl(to_type=to_type, buffer=buffer), wrap_lines=True),
         ])
         if debug:
             root_container = HSplit([
-                Window(TtypBufferControl(to_type=to_type, buffer=buffer), wrap_lines=False),
+                Window(TtypBufferControl(to_type=to_type, buffer=buffer), wrap_lines=True),
                 Window(BufferControl(buffer=self._debug_buffer), wrap_lines=True)
             ])
         layout = Layout(root_container)
@@ -151,7 +151,6 @@ class TtypApp():
             buffer.text = buffer.text[:-1]
         buffer.cursor_position = new_cursor_position
         # self._debug(new_cursor_position)
-        # self._debug(buffer.cursor_position)
 
         if not wrapped:
             return
