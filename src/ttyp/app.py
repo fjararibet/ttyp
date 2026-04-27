@@ -10,12 +10,15 @@ from prompt_toolkit.application import get_app
 import textwrap
 from .ttyp import Ttyp
 
-class GhostBufferControl(BufferControl):
+wrapped = None
+
+class TtypBufferControl(BufferControl):
     def __init__(self, *args, to_type: list[str], **kwargs):
         super().__init__(*args, **kwargs)
         self.to_type = to_type
 
     def create_content(self, width, height, preview_search=False):
+        global wrapped
         real = super().create_content(width, height, preview_search)
 
         wrapped = textwrap.wrap(
@@ -30,7 +33,7 @@ class GhostBufferControl(BufferControl):
 
         def render_line(typed_line: str, target_line: str):
             tokens = []
-            typed_words = typed_line.split(" ") if typed_line else []
+            typed_words = typed_line.split(" ")
             target_words = target_line.split(" ")
 
             for idx, target_word in enumerate(target_words):
@@ -92,11 +95,11 @@ class TtypApp():
         )
         self._debug_buffer = Buffer()
         root_container = HSplit([
-            Window(GhostBufferControl(to_type=to_type, buffer=buffer), wrap_lines=False),
+            Window(TtypBufferControl(to_type=to_type, buffer=buffer), wrap_lines=False),
         ])
         if debug:
             root_container = HSplit([
-                Window(BufferControl(buffer=buffer), wrap_lines=True),
+                Window(TtypBufferControl(to_type=to_type, buffer=buffer), wrap_lines=False),
                 Window(BufferControl(buffer=self._debug_buffer), wrap_lines=True)
             ])
         layout = Layout(root_container)
@@ -146,13 +149,25 @@ class TtypApp():
         # In case a space key is blocked
         if new_cursor_position == buffer.cursor_position - 1:
             buffer.text = buffer.text[:-1]
-
-        # # cursor can't be moved ahead if the buffer is not big enough,
-        # # so spaces are added
-        diff = new_cursor_position - buffer.cursor_position
-        buffer.text += " " * diff
-
         buffer.cursor_position = new_cursor_position
+        # self._debug(new_cursor_position)
+        # self._debug(buffer.cursor_position)
+
+        if not wrapped:
+            return
+
+        doc = buffer.document
+        i = doc.cursor_position_row
+        if i >= len(wrapped):
+            return
+
+        # Require number of word is the same and go to next line on space
+        typed_line = doc.lines[i]
+        typed_words = typed_line.split()
+        target_words = wrapped[i].split()
+        if len(typed_words) == len(target_words) and typed_line.endswith(" "):
+            buffer.delete_before_cursor(count=1)
+            buffer.newline()
 
         if ttyp.is_done(buffer.text, buffer.cursor_position):
             wpm = ttyp.get_wpm(buffer.text)
