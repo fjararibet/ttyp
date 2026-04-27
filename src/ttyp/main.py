@@ -10,10 +10,14 @@ from .content import (
     get_file_content,
 )
 from .app import TtypApp
+import importlib.metadata
 
 
 def main():
     args = get_args()
+    if args.version: 
+        print(importlib.metadata.version("ttyp"))
+        return
     if args.list_languages:
         languages = get_available_languages()
         print("\n".join(languages))
@@ -23,11 +27,11 @@ def main():
         print("\n".join(languages))
         return
     verbosity_level = args.verbose - args.quiet
-    # to_type, source = (
-    #     random_quote(args.language) if args.quote
-    #     else get_file_content(args.filepath) if args.filepath
-    #     else random_words(args.language, args.count, args.punctuation), None
-    # )
+    to_type, source = (
+        random_quote(args.language) if args.quote
+        else get_file_content(args.filepath) if args.filepath
+        else random_words(args.language, args.count, args.punctuation), None
+    )
     to_type, source = random_words(args.language, args.count, args.punctuation), None
     ttyp = Ttyp(to_type=to_type)
     app = TtypApp(

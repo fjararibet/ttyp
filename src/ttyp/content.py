@@ -43,7 +43,7 @@ def random_quote(language: str):
         chosen_quote_info = choice(quotes)
         chosen_quote = chosen_quote_info["text"]
         source = chosen_quote_info["source"]
-        return chosen_quote, source
+        return chosen_quote.split(), source
 
 
 def get_available_languages():
@@ -69,7 +69,7 @@ def get_available_quote_languages():
 def get_file_content(filename: str):
     try:
         with open(filename, 'r', encoding='utf-8') as f:
-            return f.read().replace("\n", " "), None
+            return f.read().split(), None
     except OSError as e:
         print(f"Could not read file '{filename}': {e}")
         sys.exit(1)

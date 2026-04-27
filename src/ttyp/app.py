@@ -165,7 +165,6 @@ class TtypApp():
         typed_words = typed_line.split()
         target_words = wrapped[i].split()
         if len(typed_words) == len(target_words) and typed_line.endswith(" "):
-            buffer.delete_before_cursor(count=1)
             buffer.newline()
 
         if ttyp.is_done(buffer.text, buffer.cursor_position):

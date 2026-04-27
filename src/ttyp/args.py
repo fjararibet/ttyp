@@ -43,5 +43,6 @@ def get_args():
     parser.add_argument("-v", "--verbose", action="count", default=1,
                         help="Increase output, can be used multiple times")
     parser.add_argument("-d", "--debug", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--version", action="store_true", help=argparse.SUPPRESS)
 
     return parser.parse_args()
