@@ -7,10 +7,60 @@ from prompt_toolkit.lexers import Lexer
 from prompt_toolkit.styles import Style
 from prompt_toolkit.document import Document
 from prompt_toolkit.application import get_app
+from dataclasses import dataclass
+import sys
 import textwrap
 from .ttyp import Ttyp
 
 wrapped = None
+
+
+@dataclass
+class VirtualLine:
+    words: list[str]
+    width: int
+
+def ttyp_wrap(typed_words: list[str], to_type: list[str], width: int) -> list[str]:
+    lines = []
+    word_idx = 0
+    while word_idx < len(typed_words):
+        curr_line = VirtualLine(words=[], width=0)
+        for type_word, to_type_word in zip(typed_words[word_idx:], to_type[word_idx:]):
+            word_len = max(len(type_word), len(to_type_word)) + 1
+            if curr_line.width + word_len > width:
+                break
+            curr_line.width += word_len
+            curr_line.words.append(to_type_word)
+        word_idx += len(curr_line.words)
+        lines.append(curr_line)
+
+    # remaining typing line
+    if lines:
+        i = 0
+        for word in to_type[word_idx:]:
+            word_len = len(word) + 1
+            if lines and lines[-1].width + word_len > width:
+                break
+            lines[-1].width += word_len
+            lines[-1].words.append(word)
+            i += 1
+        word_idx += i
+
+    while word_idx < len(to_type):
+        curr_line = VirtualLine(words=[], width=0)
+        for to_type_word in to_type[word_idx:]:
+            word_len = len(to_type_word) + 1
+            if curr_line.width + word_len > width:
+                break
+            curr_line.width += word_len
+            curr_line.words.append(to_type_word)
+        word_idx += len(curr_line.words)
+        lines.append(curr_line)
+    str_line =  [
+        " ".join(line.words) + " "
+        for line in lines
+    ]
+    return str_line
 
 class TtypBufferControl(BufferControl):
     def __init__(self, *args, to_type: list[str], **kwargs):
@@ -21,11 +71,10 @@ class TtypBufferControl(BufferControl):
         global wrapped
         real = super().create_content(width, height, preview_search)
 
-        wrapped = textwrap.wrap(
-            " ".join(self.to_type),
-            width=max(1, width - 1),
-            break_long_words=False,
-            break_on_hyphens=False,
+        wrapped = ttyp_wrap(
+            typed_words=self.buffer.text.split(),
+            to_type=self.to_type,
+            width=width-1,
         )
 
         typed_lines = self.buffer.document.lines  # always at least [""]
@@ -95,11 +144,11 @@ class TtypApp():
         )
         self._debug_buffer = Buffer()
         root_container = HSplit([
-            Window(TtypBufferControl(to_type=to_type, buffer=buffer), wrap_lines=True),
+            Window(TtypBufferControl(to_type=to_type, buffer=buffer), wrap_lines=False),
         ])
         if debug:
             root_container = HSplit([
-                Window(TtypBufferControl(to_type=to_type, buffer=buffer), wrap_lines=True),
+                Window(TtypBufferControl(to_type=to_type, buffer=buffer), wrap_lines=False),
                 Window(BufferControl(buffer=self._debug_buffer), wrap_lines=True)
             ])
         layout = Layout(root_container)
@@ -128,9 +177,9 @@ class TtypApp():
         def exit_(event: KeyPressEvent):
             event.app.exit()
 
-        @kb.add('enter')
-        def disable_enter(event: KeyPressEvent):
-            pass
+        # @kb.add('enter')
+        # def disable_enter(event: KeyPressEvent):
+        #     pass
 
         return kb
 
@@ -147,10 +196,9 @@ class TtypApp():
             cursor_position=buffer.cursor_position,
         )
         # In case a space key is blocked
-        if new_cursor_position == buffer.cursor_position - 1:
-            buffer.text = buffer.text[:-1]
+        # if new_cursor_position == buffer.cursor_position - 1:
+        #     buffer.text = buffer.text[:-1]
         buffer.cursor_position = new_cursor_position
-        # self._debug(new_cursor_position)
 
         if not wrapped:
             return
@@ -181,4 +229,4 @@ class TtypApp():
                 })
 
     def _debug(self, text):
-        self._debug_buffer.text += str(text) + " "
+        self._debug_buffer.text = str(text) + "\n"
