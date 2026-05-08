@@ -12,8 +12,6 @@ import sys
 import textwrap
 from .ttyp import Ttyp
 
-wrapped = None
-
 
 @dataclass
 class VirtualLine:
@@ -65,21 +63,19 @@ def ttyp_wrap(typed_words: list[str], to_type: list[str], width: int) -> list[st
 class TtypBufferControl(BufferControl):
     def __init__(self, *args, to_type: list[str], **kwargs):
         super().__init__(*args, **kwargs)
-        self.to_type = to_type
+        self._to_type = to_type
+        self.wrapped = []
 
     def create_content(self, width, height, preview_search=False):
-        global wrapped
         real = super().create_content(width, height, preview_search)
 
-        wrapped = ttyp_wrap(
+        self.wrapped = ttyp_wrap(
             typed_words=self.buffer.text.split(),
-            to_type=self.to_type,
-            width=width-1,
+            to_type=self._to_type,
+            width=width,
         )
 
         typed_lines = self.buffer.document.lines  # always at least [""]
-        total = max(len(typed_lines), len(wrapped))
-
         def render_line(typed_line: str, target_line: str):
             tokens = []
             typed_words = typed_line.split(" ")
@@ -103,54 +99,50 @@ class TtypBufferControl(BufferControl):
                     # whole word still to type
                     tokens.append(("class:ghost", target_word))
 
-                # space between words (not after the last one)
+                # space between words
                 if idx < len(target_words):
                     tokens.append(("", " "))
             return tokens
 
         def get_line(lineno):
             typed_line = typed_lines[lineno] if lineno < len(typed_lines) else ""
-            target_line = wrapped[lineno] if lineno < len(wrapped) else ""
+            target_line = self.wrapped[lineno] if lineno < len(self.wrapped) else ""
 
             if not target_line:
-                # past the ghost — defer to whatever the real BufferControl produced
-                if lineno < real.line_count:
-                    return real.get_line(lineno)
                 return []
 
             return render_line(typed_line, target_line)
 
         return UIContent(
             get_line=get_line,
-            line_count=total,
+            line_count=len(self.wrapped),
             cursor_position=real.cursor_position,
             show_cursor=real.show_cursor,
         )
 
 
-class TtypBuffer(Buffer):
-    def __init__(self, ttyp: Ttyp, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.ttyp = ttyp
-
-
 class TtypApp():
     def __init__(self, ttyp: Ttyp, to_type: list[str], erase_when_done: bool, debug: bool = False):
-        self._to_type = to_type
-        buffer = TtypBuffer(
-            ttyp=ttyp,
+        self._ttyp = ttyp
+        self._wrapped_to_type = ttyp_wrap(
+            to_type=to_type,
+            typed_words=[],
+            width=10,
+        )
+        buffer = Buffer(
             on_text_insert=self._on_insert,
             on_cursor_position_changed=self._on_cursor_change
         )
+        self._buffer_control = TtypBufferControl(to_type=to_type, buffer=buffer)
+        windows = [
+            Window(self._buffer_control, wrap_lines=False),
+        ]
         self._debug_buffer = Buffer()
-        root_container = HSplit([
-            Window(TtypBufferControl(to_type=to_type, buffer=buffer), wrap_lines=False),
-        ])
         if debug:
-            root_container = HSplit([
-                Window(TtypBufferControl(to_type=to_type, buffer=buffer), wrap_lines=False),
+            windows.append(
                 Window(BufferControl(buffer=self._debug_buffer), wrap_lines=True)
-            ])
+            )
+        root_container = HSplit(windows)
         layout = Layout(root_container)
 
         style = Style.from_dict({
@@ -177,44 +169,40 @@ class TtypApp():
         def exit_(event: KeyPressEvent):
             event.app.exit()
 
-        # @kb.add('enter')
-        # def disable_enter(event: KeyPressEvent):
-        #     pass
-
         return kb
 
-    def _on_cursor_change(self, buffer: TtypBuffer):
+    def _on_cursor_change(self, buffer: Buffer):
         end = len(buffer.text)
         if buffer.cursor_position < end:
             buffer.cursor_position = end
 
-    def _on_insert(self, buffer: TtypBuffer):
-        ttyp: Ttyp = buffer.ttyp
-        new_cursor_position = ttyp.insert_char(
+    def _on_insert(self, buffer: Buffer):
+        new_cursor_position = self._ttyp.insert_char(
             typed=buffer.text,
             last_char=buffer.document.char_before_cursor,
             cursor_position=buffer.cursor_position,
         )
         # In case a space key is blocked
-        # if new_cursor_position == buffer.cursor_position - 1:
-        #     buffer.text = buffer.text[:-1]
+        if new_cursor_position == buffer.cursor_position - 1:
+            buffer.text = buffer.text[:-1]
         buffer.cursor_position = new_cursor_position
 
-        if not wrapped:
+        if not self._buffer_control.wrapped:
             return
 
         doc = buffer.document
         i = doc.cursor_position_row
-        if i >= len(wrapped):
+        if i >= len(self._buffer_control.wrapped):
             return
 
         # Require number of word is the same and go to next line on space
         typed_line = doc.lines[i]
         typed_words = typed_line.split()
-        target_words = wrapped[i].split()
+        target_words = self._buffer_control.wrapped[i].split()
         if len(typed_words) == len(target_words) and typed_line.endswith(" "):
             buffer.newline()
 
+        ttyp = self._ttyp
         if ttyp.is_done(buffer.text, buffer.cursor_position):
             wpm = ttyp.get_wpm(buffer.text)
             acc = ttyp.get_acc(buffer.text)
