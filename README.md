@@ -1,5 +1,5 @@
 # ttyp
-Typing test in your terminal. Pronounced *tee-type*.
+Typing test in your terminal.
 
 # Installation
 Install `ttyp` using pip:
@@ -35,5 +35,5 @@ ttyp 2> >(python your-processing-script.py)
 ```
 
 # Credits
-Language word lists derived from the [Monkeytype project](https://github.com/monkeytype/monkeytype),  
+Language word lists derived from the [Monkeytype project](https://github.com/monkeytypegame/monkeytype),  
 available under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.html).
