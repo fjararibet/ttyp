@@ -19,6 +19,7 @@ class VirtualLine:
     width: int
 
 def ttyp_wrap(typed_words: list[str], to_type: list[str], width: int) -> list[str]:
+    # TODO: evaluate performance of range() instead of slicing
     lines = []
     word_idx = 0
     while word_idx < len(typed_words):
@@ -54,11 +55,7 @@ def ttyp_wrap(typed_words: list[str], to_type: list[str], width: int) -> list[st
             curr_line.words.append(to_type_word)
         word_idx += len(curr_line.words)
         lines.append(curr_line)
-    str_line =  [
-        " ".join(line.words) + " "
-        for line in lines
-    ]
-    return str_line
+    return [line.words for line in lines]
 
 class TtypBufferControl(BufferControl):
     def __init__(self, *args, to_type: list[str], **kwargs):
@@ -75,11 +72,8 @@ class TtypBufferControl(BufferControl):
             width=width,
         )
 
-        typed_lines = self.buffer.document.lines  # always at least [""]
-        def render_line(typed_line: str, target_line: str):
+        def render_line(typed_words: list[str], target_words: list[str]):
             tokens = []
-            typed_words = typed_line.split(" ")
-            target_words = target_line.split(" ")
 
             for idx, target_word in enumerate(target_words):
                 if idx < len(typed_words):
@@ -105,13 +99,16 @@ class TtypBufferControl(BufferControl):
             return tokens
 
         def get_line(lineno):
-            typed_line = typed_lines[lineno] if lineno < len(typed_lines) else ""
-            target_line = self.wrapped[lineno] if lineno < len(self.wrapped) else ""
-
-            if not target_line:
+            if not self.wrapped:
                 return []
 
-            return render_line(typed_line, target_line)
+            typed_lines = self.buffer.document.lines
+            typed_words = typed_lines[lineno].split() if lineno < len(typed_lines) else []
+
+            assert lineno < len(self.wrapped)
+            target_words = self.wrapped[lineno]
+
+            return render_line(typed_words, target_words)
 
         return UIContent(
             get_line=get_line,
@@ -198,7 +195,7 @@ class TtypApp():
         # Require number of word is the same and go to next line on space
         typed_line = doc.lines[i]
         typed_words = typed_line.split()
-        target_words = self._buffer_control.wrapped[i].split()
+        target_words = self._buffer_control.wrapped[i]
         if len(typed_words) == len(target_words) and typed_line.endswith(" "):
             buffer.newline()
 

@@ -32,7 +32,7 @@ class Ttyp():
             self._start = time.time()
         typed_words = typed.split()
         if (last_char == " "):
-            correctly_typed = len(typed_words[-1]) == len(self._to_type[len(typed_words)-1])
+            correctly_typed = len(typed_words[-1]) >= len(self._to_type[len(typed_words)-1])
             if correctly_typed:
                 return cursor_position
             return cursor_position - 1
