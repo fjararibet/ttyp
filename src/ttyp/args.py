@@ -1,5 +1,5 @@
 import argparse
-from .content import get_available_languages, get_available_quote_languages
+from .content import get_available_languages
 
 
 def valid_language(language):
@@ -8,15 +8,6 @@ def valid_language(language):
             f"invalid choice: {language!r} (use -L to see valid languages)"
         )
     return language
-
-
-def valid_quote_language(language):
-    if language not in get_available_quote_languages():
-        raise argparse.ArgumentTypeError(
-            f"invalid choice: {language!r} (use --list-quote-languages to see valid languages)"
-        )
-    return language
-
 
 def get_args():
     parser = argparse.ArgumentParser(description="CLI typing test")
@@ -27,14 +18,8 @@ def get_args():
     parser.add_argument(
         "-c", "--count", type=int, default=25, help="Word count to be typed"
     )
-    parser.add_argument("-Q", "--quote", action="store_true", help="Type a quote")
     parser.add_argument(
         "-L", "--list-languages", action="store_true", help="List available languages"
-    )
-    parser.add_argument(
-        "--list-quote-languages",
-        action="store_true",
-        help="List available quote languages",
     )
     parser.add_argument(
         "-p", "--punctuation", action="store_true", help="Enable punctuation"

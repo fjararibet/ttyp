@@ -5,8 +5,6 @@ from .ttyp import Ttyp
 from .content import (
     random_words,
     get_available_languages,
-    random_quote,
-    get_available_quote_languages,
     get_file_content,
 )
 from .app import TtypApp
@@ -22,15 +20,9 @@ def main():
         languages = get_available_languages()
         print("\n".join(languages))
         return
-    if args.list_quote_languages:
-        languages = get_available_quote_languages()
-        print("\n".join(languages))
-        return
     verbosity_level = args.verbose - args.quiet
-    to_type, source = (
-        random_quote(args.language)
-        if args.quote
-        else get_file_content(args.filepath)
+    to_type, _ = (
+        get_file_content(args.filepath)
         if args.filepath
         else random_words(args.language, args.count, args.punctuation),
         None,
@@ -54,9 +46,6 @@ def main():
         mistakes = result.get("mistakes")
         print(f"mistakes {mistakes}", file=sys.stderr)
         print(f"correct {correct}", file=sys.stderr)
-    if result and args.quote and verbosity_level >= 1:
-        print(f'source "{source}"', file=sys.stderr)
-
 
 if __name__ == "__main__":
     main()

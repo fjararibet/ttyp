@@ -27,7 +27,7 @@ ttyp --list-languages
 # Tips
 Alias your favorite options to `ttyp`:
 ```
-alias ttyp="ttyp -q --quote portuguese"
+alias ttyp="ttyp -q --language portuguese"
 ```
 Stats are written to `stderr`, so you can redirect them to a processing script using process substitution:
 ```

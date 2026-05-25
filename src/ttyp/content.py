@@ -39,22 +39,6 @@ def random_words(language: str, word_count: int, punctuation: bool) -> list[str]
         return chosen_word_list
 
 
-def random_quote(language: str):
-    if language not in get_available_quote_languages():
-        print(
-            "Language not supported for quotes, use --list-quote-languages to see available quote languages"
-        )
-        sys.exit(1)
-    package = "ttyp.static.quotes"
-    with importlib.resources.open_text(package, f"{language}.json") as f:
-        data = json.load(f)
-        quotes = data["quotes"]
-        chosen_quote_info = choice(quotes)
-        chosen_quote = chosen_quote_info["text"]
-        source = chosen_quote_info["source"]
-        return chosen_quote.split(), source
-
-
 def get_available_languages():
     package = "ttyp.static.languages"
     data_dir = importlib.resources.files(package)
@@ -63,17 +47,6 @@ def get_available_languages():
         for entry in data_dir.iterdir()
         if entry.name not in ["__init__.py", "__pycache__"]
     ]
-
-
-def get_available_quote_languages():
-    package = "ttyp.static.quotes"
-    data_dir = importlib.resources.files(package)
-    return [
-        Path(entry.name).stem
-        for entry in data_dir.iterdir()
-        if entry.name not in ["__init__.py", "__pycache__"]
-    ]
-
 
 def get_file_content(filename: str):
     try:
