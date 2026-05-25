@@ -15,7 +15,7 @@ import importlib.metadata
 
 def main():
     args = get_args()
-    if args.version: 
+    if args.version:
         print(importlib.metadata.version("ttyp"))
         return
     if args.list_languages:
@@ -28,23 +28,26 @@ def main():
         return
     verbosity_level = args.verbose - args.quiet
     to_type, source = (
-        random_quote(args.language) if args.quote
-        else get_file_content(args.filepath) if args.filepath
-        else random_words(args.language, args.count, args.punctuation), None
+        random_quote(args.language)
+        if args.quote
+        else get_file_content(args.filepath)
+        if args.filepath
+        else random_words(args.language, args.count, args.punctuation),
+        None,
     )
     ttyp = Ttyp(to_type=to_type)
     app = TtypApp(
         to_type=to_type,
         ttyp=ttyp,
         erase_when_done=verbosity_level <= 0,
-        debug=args.debug
+        debug=args.debug,
     )
     result = app.run()
     if result and verbosity_level >= 0:
         wpm = result.get("wpm")
         acc = result.get("acc")
         print(f"wpm {wpm:.1f}", file=sys.stderr)
-        print(f"acc {acc*100:.1f}%", file=sys.stderr)
+        print(f"acc {acc * 100:.1f}%", file=sys.stderr)
 
     if result and verbosity_level >= 2:
         correct = result.get("correct")
@@ -55,5 +58,5 @@ def main():
         print(f'source "{source}"', file=sys.stderr)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

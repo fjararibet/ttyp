@@ -9,12 +9,19 @@ def _has_capital(s: str):
     return any(c.isupper() for c in s)
 
 
-punctuation_marks = [".", ",", ":", ";", "!", "?",]
+punctuation_marks = [
+    ".",
+    ",",
+    ":",
+    ";",
+    "!",
+    "?",
+]
 
 
 def random_words(language: str, word_count: int, punctuation: bool) -> list[str]:
     package = "ttyp.static.languages"
-    with importlib.resources.open_text(package, f'{language}.json') as f:
+    with importlib.resources.open_text(package, f"{language}.json") as f:
         data = json.load(f)
         words = data["words"]
         if not punctuation:
@@ -34,10 +41,12 @@ def random_words(language: str, word_count: int, punctuation: bool) -> list[str]
 
 def random_quote(language: str):
     if language not in get_available_quote_languages():
-        print("Language not supported for quotes, use --list-quote-languages to see available quote languages")
+        print(
+            "Language not supported for quotes, use --list-quote-languages to see available quote languages"
+        )
         sys.exit(1)
     package = "ttyp.static.quotes"
-    with importlib.resources.open_text(package, f'{language}.json') as f:
+    with importlib.resources.open_text(package, f"{language}.json") as f:
         data = json.load(f)
         quotes = data["quotes"]
         chosen_quote_info = choice(quotes)
@@ -52,7 +61,7 @@ def get_available_languages():
     return [
         Path(entry.name).stem
         for entry in data_dir.iterdir()
-        if entry.name not in  ["__init__.py", "__pycache__"]
+        if entry.name not in ["__init__.py", "__pycache__"]
     ]
 
 
@@ -62,13 +71,13 @@ def get_available_quote_languages():
     return [
         Path(entry.name).stem
         for entry in data_dir.iterdir()
-        if entry.name not in  ["__init__.py", "__pycache__"]
+        if entry.name not in ["__init__.py", "__pycache__"]
     ]
 
 
 def get_file_content(filename: str):
     try:
-        with open(filename, 'r', encoding='utf-8') as f:
+        with open(filename, "r", encoding="utf-8") as f:
             return f.read().split(), None
     except OSError as e:
         print(f"Could not read file '{filename}': {e}")

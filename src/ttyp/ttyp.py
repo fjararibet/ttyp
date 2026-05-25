@@ -1,7 +1,7 @@
 import time
 
 
-class Ttyp():
+class Ttyp:
     """Handle all game state"""
 
     def __init__(self, to_type: list[str]):
@@ -22,7 +22,7 @@ class Ttyp():
         in_final_word = len(typed_words) >= len(self._to_type)
 
         is_final_word_correct = typed_words[-1] == self._to_type[-1]
-        is_space_in_final_word = typed[cursor_position-1] == " "
+        is_space_in_final_word = typed[cursor_position - 1] == " "
         final_word_ended = is_final_word_correct or is_space_in_final_word
 
         return in_final_word and final_word_ended
@@ -31,25 +31,40 @@ class Ttyp():
         if not self._start:
             self._start = time.time()
         typed_words = typed.split()
-        if (last_char == " "):
-            correctly_typed = len(typed_words[-1]) >= len(self._to_type[len(typed_words)-1])
+        if last_char == " ":
+            if not typed_words:
+                return cursor_position - 1
+            correctly_typed = len(typed_words[-1]) >= len(
+                self._to_type[len(typed_words) - 1]
+            )
             if correctly_typed:
                 return cursor_position
-            return cursor_position - 1
+            # If there's more than two spaces at the end of typed
+            # it means the previous word was skipped,
+            # so space should have no effect
+            if typed[-2:] == "  ":
+                return cursor_position - 1
+            next_position = (
+                len(self._to_type[len(typed_words) - 1])
+                - len(typed_words[-1])
+                + cursor_position
+            )
+            self._mistakes += len(self._to_type[len(typed_words) - 1]) - len(typed_words[-1])
+            return next_position
 
         if len(typed_words) == 0:
             return cursor_position
 
         last_typed_word = typed_words[-1]
-        if (len(typed_words) > len(self._to_type)):
+        if len(typed_words) > len(self._to_type):
             return cursor_position
 
-        curr_target_word = self._to_type[len(typed_words)-1]
-        if (len(last_typed_word) > len(curr_target_word)):
+        curr_target_word = self._to_type[len(typed_words) - 1]
+        if len(last_typed_word) > len(curr_target_word):
             self._mistakes += 1
             return cursor_position
 
-        if (last_char != curr_target_word[len(last_typed_word)-1]):
+        if last_char != curr_target_word[len(last_typed_word) - 1]:
             self._mistakes += 1
         return cursor_position
 
