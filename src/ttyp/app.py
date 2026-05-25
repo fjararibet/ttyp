@@ -162,7 +162,7 @@ class TtypApp:
 
         style = Style.from_dict(
             {
-                "ghost": "#999999",
+                "ghost": "fg:ansidefault dim",
                 "wrong": "#cc0000",
                 "skipped": "#cc0000 underline",
                 "typed": "",
