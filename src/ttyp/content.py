@@ -48,22 +48,22 @@ def random_quote(language: str):
 
 def get_available_languages():
     package = "ttyp.static.languages"
-    with importlib.resources.files(package) as data_dir:
-        return [
-            Path(entry.name).stem
-            for entry in data_dir.iterdir()
-            if entry.name not in  ["__init__.py", "__pycache__"]
-        ]
+    data_dir = importlib.resources.files(package)
+    return [
+        Path(entry.name).stem
+        for entry in data_dir.iterdir()
+        if entry.name not in  ["__init__.py", "__pycache__"]
+    ]
 
 
 def get_available_quote_languages():
     package = "ttyp.static.quotes"
-    with importlib.resources.files(package) as data_dir:
-        return [
-            Path(entry.name).stem
-            for entry in data_dir.iterdir()
-            if entry.name not in  ["__init__.py", "__pycache__"]
-        ]
+    data_dir = importlib.resources.files(package)
+    return [
+        Path(entry.name).stem
+        for entry in data_dir.iterdir()
+        if entry.name not in  ["__init__.py", "__pycache__"]
+    ]
 
 
 def get_file_content(filename: str):

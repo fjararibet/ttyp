@@ -32,7 +32,6 @@ def main():
         else get_file_content(args.filepath) if args.filepath
         else random_words(args.language, args.count, args.punctuation), None
     )
-    to_type, source = random_words(args.language, args.count, args.punctuation), None
     ttyp = Ttyp(to_type=to_type)
     app = TtypApp(
         to_type=to_type,
