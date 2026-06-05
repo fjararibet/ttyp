@@ -31,6 +31,8 @@ class Ttyp:
         if not self._start:
             self._start = time.time()
         typed_words = typed.split()
+        if last_char == "\n":
+            return cursor_position - 1
         if last_char == " ":
             if not typed_words:
                 return cursor_position - 1
@@ -39,10 +41,10 @@ class Ttyp:
             )
             if correctly_typed:
                 return cursor_position
-            # If there's more than two spaces at the end of typed
-            # it means the previous word was skipped,
-            # so space should have no effect
-            if typed[-2:] == "  ":
+            # Allowing more than one typed space
+            # can make the color highlighting get desynced
+            # so its easier not deal with that
+            if typed[-1] == " " and typed[-2] != " ":
                 return cursor_position - 1
             next_position = (
                 len(self._to_type[len(typed_words) - 1])
