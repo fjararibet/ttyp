@@ -36,16 +36,18 @@ class Ttyp:
         if last_char == " ":
             if not typed_words:
                 return cursor_position - 1
+            # If there's more than two spaces at the end of typed
+            # it means the previous word was skipped,
+            # so space should have no effect
+            if typed[-2:] == "  ":
+                return cursor_position - 1
+
             correctly_typed = len(typed_words[-1]) >= len(
                 self._to_type[len(typed_words) - 1]
             )
             if correctly_typed:
                 return cursor_position
-            # Allowing more than one typed space
-            # can make the color highlighting get desynced
-            # so its easier not deal with that
-            if typed[-1] == " " and typed[-2] != " ":
-                return cursor_position - 1
+
             next_position = (
                 len(self._to_type[len(typed_words) - 1])
                 - len(typed_words[-1])
