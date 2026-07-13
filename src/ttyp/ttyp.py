@@ -36,10 +36,10 @@ class Ttyp:
         if last_char == " ":
             if not typed_words:
                 return cursor_position - 1
-            # If there's more than two spaces at the end of typed
-            # it means the previous word was skipped,
-            # so space should have no effect
-            if typed[-2:] == "  ":
+
+            # Purposefully don't allow two whitespace actions to be done
+            # since the user probably didn't mean it
+            if cursor_position > 1 and typed[cursor_position - 2].isspace():
                 return cursor_position - 1
 
             correctly_typed = len(typed_words[-1]) >= len(
