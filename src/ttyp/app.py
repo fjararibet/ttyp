@@ -139,6 +139,7 @@ class TtypApp:
         self, ttyp: Ttyp, to_type: list[str], erase_when_done: bool, debug: bool = False
     ):
         self._ttyp = ttyp
+        self._previous_text = ""
         self._wrapped_to_type = ttyp_wrap(
             to_type=to_type,
             typed_words=[],
@@ -175,6 +176,7 @@ class TtypApp:
             style=style,
             erase_when_done=erase_when_done,
         )
+        self._app.key_processor.after_key_press += self._on_keypress
 
     def run(self):
         return self._app.run()
@@ -193,6 +195,22 @@ class TtypApp:
         end = len(buffer.text)
         if buffer.cursor_position < end:
             buffer.cursor_position = end
+
+    def _on_keypress(self, _):
+        buffer = self._buffer_control.buffer
+        text = buffer.text
+        previous_text = self._previous_text
+        self._previous_text = text
+
+        if text == previous_text or not previous_text.startswith(text):
+            return
+
+        previous_line = previous_text.removesuffix("\n")
+        skip_padding = len(previous_line) - len(previous_line.rstrip(" "))
+        remaining_padding = len(text) - len(text.rstrip(" "))
+        if skip_padding > 1 and remaining_padding:
+            buffer.delete_before_cursor(remaining_padding)
+            self._previous_text = buffer.text
 
     def _on_insert(self, buffer: Buffer):
         new_cursor_position = self._ttyp.insert_char(
