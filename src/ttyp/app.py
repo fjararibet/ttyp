@@ -200,11 +200,11 @@ class TtypApp:
             last_char=buffer.document.char_before_cursor,
             cursor_position=buffer.cursor_position,
         )
-        # In case a space key is blocked
-        if new_cursor_position == buffer.cursor_position - 1:
-            buffer.text = buffer.text[:-1]
-        buffer.text += " " * (new_cursor_position - buffer.cursor_position)
-        buffer.cursor_position = new_cursor_position
+        cursor_adjustment = new_cursor_position - buffer.cursor_position
+        if cursor_adjustment < 0:
+            buffer.delete_before_cursor(-cursor_adjustment)
+        elif cursor_adjustment:
+            buffer.insert_text(" " * cursor_adjustment, fire_event=False)
 
         if not self._buffer_control.wrapped:
             return
@@ -235,7 +235,7 @@ class TtypApp:
         typed_words = typed_line.split()
         target_words = self._buffer_control.wrapped[i]
         if len(typed_words) == len(target_words) and typed_line.endswith(" "):
-            buffer.newline()
+            buffer.insert_text("\n", fire_event=False)
 
     def _debug(self, text):
         self._debug_buffer.text = str(text) + "\n"
