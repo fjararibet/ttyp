@@ -25,6 +25,11 @@ def get_args():
         "-p", "--punctuation", action="store_true", help="Enable punctuation"
     )
     parser.add_argument(
+        "--flip-colors",
+        action="store_true",
+        help="Dim typed text instead of ghost text",
+    )
+    parser.add_argument(
         "-q",
         "--quiet",
         action="count",

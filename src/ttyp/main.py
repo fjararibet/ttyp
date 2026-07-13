@@ -33,6 +33,7 @@ def main():
         ttyp=ttyp,
         erase_when_done=verbosity_level <= 0,
         debug=args.debug,
+        flip_colors=args.flip_colors,
     )
     result = app.run()
     if result and verbosity_level >= 0:

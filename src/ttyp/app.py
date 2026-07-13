@@ -136,7 +136,12 @@ class TtypBufferControl(BufferControl):
 
 class TtypApp:
     def __init__(
-        self, ttyp: Ttyp, to_type: list[str], erase_when_done: bool, debug: bool = False
+        self,
+        ttyp: Ttyp,
+        to_type: list[str],
+        erase_when_done: bool,
+        debug: bool = False,
+        flip_colors: bool = False,
     ):
         self._ttyp = ttyp
         self._previous_text = ""
@@ -163,10 +168,10 @@ class TtypApp:
 
         style = Style.from_dict(
             {
-                "typed": "fg:ansidefault dim",
+                "typed": "fg:ansidefault dim" if flip_colors else "fg:ansidefault",
                 "wrong": "fg:ansired",
                 "skipped": "fg:ansired underline",
-                "ghost": "",
+                "ghost": "fg:ansidefault" if flip_colors else "fg:ansidefault dim",
             }
         )
         self._app = Application(
