@@ -1,6 +1,6 @@
 [project]
 name = "ttyp"
-version = "0.1.12"
+version = "0.1.13"
 description = "CLI typing test"
 readme = "README.md"
 license = "MIT"
