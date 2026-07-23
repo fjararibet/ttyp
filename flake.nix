@@ -81,6 +81,10 @@
       packages = forAllSystems (system: (perSystem system).packages);
       devShells = forAllSystems (system: (perSystem system).devShells);
 
+      overlays.default = final: _prev: {
+        ttyp = self.packages.${final.stdenv.hostPlatform.system}.default;
+      };
+
       apps = forAllSystems (system: {
         default = {
           type = "app";
