@@ -1,3 +1,5 @@
+
+
 # ttyp
 Typing test in your terminal.
 
@@ -6,6 +8,7 @@ Install `ttyp` using pip:
 ```
 pip install ttyp
 ```
+Requires Python 3.9 or later.
 # Usage
 Start a typing test with default settings (English, 25 words):
 ```
